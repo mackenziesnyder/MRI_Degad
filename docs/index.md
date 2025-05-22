@@ -25,3 +25,11 @@ getting_started/installation
 usage/app_cli
 usage/snakemake_cli
 ```
+
+```{toctree}
+:caption: Contributing
+:name: contributing
+:hidden:
+:maxdepth: 2
+contributing/contributing
+```

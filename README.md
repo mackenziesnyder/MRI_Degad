@@ -1,4 +1,6 @@
 # MRI-Degad: Conversion of gadolinium-enhanced T1-weighted MRI to non-gadolinium T1-weighted scans
+[![Documentation Status](https://readthedocs.org/projects/mri_degad/badge/?version=latest)](https://mri-degad.readthedocs.io/en/stable/?badge=stable)
+![Python3](https://img.shields.io/badge/python-_3.9_|_3.10_|_3.11_|_3.12-blue.svg)
 
 AIMS Lab Research Team at the Robarts Research Institute - 2024-2025
 
@@ -17,7 +19,7 @@ A brief summary of the workflow can be found below along with its Directed Acycl
 1. Preprocess input NIfTI T1w gadolinium enhanced files (n4 bias correction, isotropic 1mm voxel resampling)
 2. Download and apply the Degad model 
 
-### **Full documentation:** [here](insert future read the docs lik)
+### **Full documentation:** [here](https://mri-degad.readthedocs.io/en/latest/)
 
 ## Revalent Papers: 
 * Ogunsanya F, Taha A, Gilmore G, Kai J, Kuehn T, Thurairajah A, Tenorio MC, Khan AR, Lau JC.  
