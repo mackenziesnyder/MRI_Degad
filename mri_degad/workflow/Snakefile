@@ -1,0 +1,113 @@
+import snakebids
+from snakebids import bids, generate_inputs, get_wildcard_constraints
+from appdirs import AppDirs
+
+configfile: '/config/snakebids.yml'
+
+# Get input wildcards
+inputs = generate_inputs(
+    bids_dir=config["bids_dir"],
+    pybids_inputs=config["pybids_inputs"],
+    pybidsdb_dir=config.get("pybidsdb_dir"),
+    pybidsdb_reset=config.get("pybidsdb_reset"),
+    derivatives=config.get("derivatives", None),
+    participant_label=config.get("participant_label", None),
+    exclude_participant_label=config.get("exclude_participant_label", None),
+)
+
+print(inputs)
+print(inputs["t1w"])
+print(inputs["t1w"].wildcards)
+
+# this adds constraints to the bids naming
+wildcard_constraints:
+    **get_wildcard_constraints(config["pybids_inputs"]),
+
+# ----
+wildcard_constraints:
+    desc="[a-zA-Z0-9]+",
+    space="[a-zA-Z0-9]+",
+    hemi="[a-zA-Z0-9]+",
+    surfname="[a-zA-Z0-9]+",
+    modality="[a-zA-Z0-9]+",
+    density="[a-zA-Z0-9]+",
+    atlas="[a-zA-Z0-9]+",
+    autotop="[a-zA-Z0-9]+",
+    template="[a-zA-Z0-9]+",
+
+root = os.path.expandvars(config["root"])
+work = os.path.expandvars(config["workdir"])
+resolution = float(config['res'])
+
+def get_download_dir():
+    if "MRI_DEGAD_CACHE_DIR" in os.environ.keys():
+        download_dir = os.environ["MRI_DEGAD_CACHE_DIR"]
+    else:
+        # create local download dir if it doesn't exist
+        dirs = AppDirs("mri_degad", "jclauneurolab")
+        download_dir = dirs.user_cache_dir
+    return download_dir
+
+download_dir = get_download_dir()
+
+rule all:
+    input:
+        t1w_degad = inputs["t1w"].expand(bids(
+            root=work,
+            datatype="degad",
+            desc="degad",
+            res=config["res"],
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ))
+        
+# bias correction for gad files
+rule n4_bias_correction:
+    input:
+        im = bids(
+            root=str(Path(config["bids_dir"])),
+            datatype="anat",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )     
+    output:
+        corrected_im = bids(
+            root=work,
+            datatype="bias_correction",
+            desc="n4_bias_corr",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script:
+        "scripts/n4_bias_corr.py"
+
+# isotropic resampling
+rule isotropic_resampling:
+    input:
+        input_im = bids(
+            root=work,
+            datatype="bias_correction",
+            desc="n4_bias_corr",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ) 
+    params:
+        res=resolution
+    output:
+        resam_im = bids(
+            root=work,
+            datatype="resampled",
+            desc="resampled",
+            res=config["res"],
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ) 
+    script:
+        "scripts/resample_img.py"
+
+include: "rules/cnn.smk"
