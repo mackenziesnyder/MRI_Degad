@@ -1,0 +1,32 @@
+{
+  "dataset": "test_data_infer",
+  "loss_functions": [
+      "ssim_loss",
+      "perceptual_loss"
+  ],
+  "model_architecture": "wat_stacked_unets",
+  "checkpoint_path": null,
+  "max_epochs": 1,
+  "batch_size": 4,
+  "skip_ada_multi_losses_norm": false,
+  "enable_loss_plotting": true,
+  "plotting": {
+      "save_individual_plots": true,
+      "plot_dpi": 300,
+      "plot_format": "png"
+  },
+  "learning_rate": 0.001,
+  "height": 256,
+  "width": 256,
+  "data_loader": {
+      "split_ratio": [0.7, 0.2, 0.1],
+      "view": "mix",
+      "crop": false,
+      "split_json_path": null,
+      "data_id": "Motion",
+      "enable_SAP": true,
+      "train_preload_probability": 1.0,  
+      "val_preload_probability": 0.0,   
+      "test_preload_probability": 0.0    
+  }
+}

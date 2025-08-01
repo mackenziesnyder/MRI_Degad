@@ -1,28 +1,46 @@
 import nibabel as nib
 import numpy as np
+import os
 
-def extract_contrast_mask(gad_img, degad_img, out_mask):
-    
-    # load images
-    gad_img = nib.load(gad_img)
-    degad_img = nib.load(degad_img)
+def extract_contrast_mask_red_overlay(gad_img_path, degad_img_path, out_rgb_path):
+    # Expand paths
+    gad_img_path = os.path.expanduser(gad_img_path)
+    degad_img_path = os.path.expanduser(degad_img_path)
+    out_rgb_path = os.path.expanduser(out_rgb_path)
 
-    gadolinium_data = gad_img.get_fdata()
-    predicted_data = degad_img.get_fdata()
+    # Load images
+    gad_img = nib.load(gad_img_path)
+    degad_img = nib.load(degad_img_path)
 
-    # enhancement map
-    enhancement = gadolinium_data - predicted_data
+    gad_data = gad_img.get_fdata()
+    degad_data = degad_img.get_fdata()
 
-    # threshold to extract vasculature
+    if gad_data.shape != degad_data.shape:
+        raise ValueError("Input images must have the same shape.")
+
+    # Enhancement map
+    enhancement = gad_data - degad_data
+
+    # Threshold to extract vasculature
     threshold = np.percentile(enhancement, 99)
-    vessel_mask = enhancement > threshold
+    vessel_mask = enhancement > threshold  # shape: (X, Y, Z)
 
-    # Save mask
-    vessel_mask_nifti = nib.Nifti1Image(vessel_mask.astype(np.uint8), gad_img.affine)
-    nib.save(vessel_mask_nifti, out_mask)
+    # Create RGB image (X, Y, Z, 3)
+    rgb_shape = vessel_mask.shape + (3,)
+    rgb_img = np.zeros(rgb_shape, dtype=np.uint8)
 
-extract_contrast_mask(
-    snakemake.input.gad_img,
-    snakemake.input.degad_img,
-    snakemake.output.out_mask
+    # Red: vessel pixels
+    rgb_img[..., 0] = (vessel_mask * 255).astype(np.uint8)  # Red channel
+    rgb_img[..., 1] = 0  # Green
+    rgb_img[..., 2] = 0  # Blue
+
+    # Save RGB NIfTI
+    rgb_nifti = nib.Nifti1Image(rgb_img, gad_img.affine)
+    nib.save(rgb_nifti, out_rgb_path)
+
+# Example usage
+extract_contrast_mask_red_overlay(
+    "/localscratch/out.nii.gz",
+    "/cifs/khan_new/trainees/msalma29/degad_project/inference_results_v2/sub-P030/gad_recon_pred_fused.nii.gz",
+    "/localscratch/red_overlay.nii.gz"
 )

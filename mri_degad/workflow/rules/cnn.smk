@@ -21,9 +21,12 @@ rule apply_model:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        model_dir = Path(download_dir) / "models"
+        model_dir = Path(download_dir) / "models" / "last.ckpt"
+    params:
+        config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
+        view = "coronal"
     output: 
-        t1w_degad = bids(
+        degad_img = bids(
             root=work,
             datatype="degad",
             desc="degad",
@@ -32,4 +35,4 @@ rule apply_model:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
-    script: '../scripts/cnn_apply.py'
+    script: '../scripts/cnn_apply_2.py'

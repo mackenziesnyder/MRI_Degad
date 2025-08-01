@@ -88,7 +88,11 @@ singularity:
     itksnap: 'docker://pyushkevich/itksnap:latest'
 
 resource_urls:
-  default: 'files.osf.io/v1/resources/mkwpt/providers/osfstorage/?zip='
+  # original model 
+  # default: 'files.osf.io/v1/resources/mkwpt/providers/osfstorage/?zip='
+
+  # mahmoud's model 
+  default: 'files.osf.io/v1/resources/c23jw/providers/osfstorage/?zip='
 
 plugins.validator.skip: False
 root: results

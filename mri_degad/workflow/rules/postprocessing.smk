@@ -1,3 +1,27 @@
+rule image_denoising:
+    input:
+        degad = bids(
+            root=work,
+            datatype="degad",
+            desc="degad",
+            res=config["res"],
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    output: 
+        degad = bids(
+            root=work,
+            datatype="denoised",
+            desc="degad",
+            res=config["res"],
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script:
+        "../scripts/denoise_img.py"  
+
 rule registration:
     input:
         fixed_gad = bids(
@@ -9,7 +33,7 @@ rule registration:
         ),
         moving_degad = bids(
             root=work,
-            datatype="degad",
+            datatype="denoised",
             desc="degad",
             res=config["res"],
             suffix="T1w.nii.gz",

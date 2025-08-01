@@ -29,6 +29,9 @@ nilearn = "0.10.3"
 monai = "^1.4.0"
 tqdm = "^4.67.1"
 torchmetrics = "^1.6.3"
+pytorch-lightning = "^2.5.2"
+torchio = "^0.20.19"
+lpips = "^0.1.4"
 
 [tool.poetry.scripts]
 mri_degad = "mri_degad.run:app.run"

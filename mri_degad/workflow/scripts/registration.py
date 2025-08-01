@@ -1,6 +1,7 @@
 import csv
 import ants
 import numpy as np
+import os
 
 
 def antsmat2mat(transform, m_center):
@@ -75,11 +76,13 @@ def registration(fixed_image, moving_image, out_im):
     -------
     None
     """
+    fixed_image = os.path.expanduser(fixed_image)
+    moving_image = os.path.expanduser(moving_image)
+    out_im = os.path.expanduser(out_im)
 
     # Load images
     fixed_image = ants.image_read(fixed_image)
     moving_image = ants.image_read(moving_image)
-    print("Before transform ct:", moving_image.shape)
 
     # Perform registration
     registration_result = ants.registration(
@@ -89,7 +92,6 @@ def registration(fixed_image, moving_image, out_im):
 
     # Get the registered (warped) moving image
     registered_image = registration_result["warpedmovout"]
-    print("after transform ct:", registered_image.shape)
 
     # Get the forward transformation
     transformation_file_path = registration_result["fwdtransforms"][0]
@@ -110,7 +112,7 @@ def registration(fixed_image, moving_image, out_im):
 
 
 registration(
-    moving_image=snakemake.input.moving_degad,
-    fixed_image=snakemake.input.fixed_gad,
-    out_im=snakemake.output.out_im
+    moving_image="~/graham/projects/ctb-akhanf/cfmm-bids/Lau/degad/bids/sub-P030/ses-pre/anat/sub-P030_ses-pre_acq-gad_run-01_T1w.nii.gz",
+    fixed_image ="/cifs/khan_new/trainees/msalma29/degad_project/inference_results_v2/sub-P030/gad_recon_pred_fused.nii.gz",
+    out_im ="/localscratch/out.nii.gz"
 )
