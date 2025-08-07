@@ -10,7 +10,7 @@ rule download_cnn_model:
         " unzip -q -d {output.unzip_dir} model.zip && "
         " rm model.zip"
 
-rule apply_model:
+rule apply_model_cornonal:
     input:
         t1w_gad = bids(
             root=work,
@@ -29,7 +29,61 @@ rule apply_model:
         degad_img = bids(
             root=work,
             datatype="degad",
-            desc="degad",
+            desc="degad_coronal",
+            res=config["res"],
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script: '../scripts/cnn_apply_2.py'
+
+rule apply_model_axial:
+    input:
+        t1w_gad = bids(
+            root=work,
+            datatype="resampled",
+            desc="resampled",
+            res=config["res"],
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
+        model_dir = Path(download_dir) / "models" / "last.ckpt"
+    params:
+        config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
+        view = "axial"
+    output: 
+        degad_img = bids(
+            root=work,
+            datatype="degad",
+            desc="degad_axial",
+            res=config["res"],
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script: '../scripts/cnn_apply_2.py'
+
+rule apply_model_sagittal:
+    input:
+        t1w_gad = bids(
+            root=work,
+            datatype="resampled",
+            desc="resampled",
+            res=config["res"],
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
+        model_dir = Path(download_dir) / "models" / "last.ckpt"
+    params:
+        config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
+        view = "sagittal"
+    output: 
+        degad_img = bids(
+            root=work,
+            datatype="degad",
+            desc="degad_sagittal",
             res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
