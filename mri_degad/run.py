@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-
+import os
 from snakebids import bidsapp, plugins
 
 CONFIG_PATH = Path(__file__).resolve().parent / "config" / "snakebids.yml"
