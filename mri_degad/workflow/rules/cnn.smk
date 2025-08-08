@@ -21,7 +21,7 @@ rule apply_model_cornonal:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        model_dir = Path(download_dir) / "models" / "last.ckpt"
+        model_dir = Path(download_dir) / "models"
     params:
         config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
         view = "coronal"
@@ -48,7 +48,7 @@ rule apply_model_axial:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        model_dir = Path(download_dir) / "models" / "last.ckpt"
+        model_dir = Path(download_dir) / "models"
     params:
         config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
         view = "axial"
@@ -75,7 +75,7 @@ rule apply_model_sagittal:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        model_dir = Path(download_dir) / "models" / "last.ckpt"
+        model_dir = Path(download_dir) / "models"
     params:
         config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
         view = "sagittal"
