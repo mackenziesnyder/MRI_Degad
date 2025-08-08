@@ -112,7 +112,7 @@ def registration(fixed_image, moving_image, out_im):
 
 
 registration(
-    moving_image="~/graham/projects/ctb-akhanf/cfmm-bids/Lau/degad/bids/sub-P030/ses-pre/anat/sub-P030_ses-pre_acq-gad_run-01_T1w.nii.gz",
-    fixed_image ="/cifs/khan_new/trainees/msalma29/degad_project/inference_results_v2/sub-P030/gad_recon_pred_fused.nii.gz",
-    out_im ="/localscratch/out.nii.gz"
+    moving_image=snakemake.input.moving_degad,
+    fixed_image=snakemake.input.fixed_gad,
+    out_im=snakemake.output.out_im
 )
