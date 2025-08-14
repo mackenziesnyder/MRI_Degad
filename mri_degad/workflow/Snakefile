@@ -57,14 +57,38 @@ rule all:
         #     acq="gad",
         #     **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         # ))
-        t1w_degad = inputs["t1w"].expand(bids(
+        mask_whole_image = inputs["t1w"].expand(bids(
             root=work,
             datatype="mask",
             suffix="mask.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )),
+        mask_skull_stripped = inputs["t1w"].expand(bids(
+            root=work,
+            datatype="mask",
+            suffix="mask_skullstripped.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )),
+        qc_plot = inputs["t1w"].expand(bids(
+            root=work,
+            datatype="qc",
+            suffix="qc.html",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ))
+        # metrics = inputs["t1w"].expand(bids(
+        #     root=work,
+        #     datatype="analysis",
+        #     suffix="metrics.txt",
+        #     acq="gad",
+        #     **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        # ))
         
 include: "rules/preprocessing.smk"
 include: "rules/cnn.smk"
 include: "rules/postprocessing.smk"
+include: "rules/qc.smk"
+
+# include: "rules/analysis.smk"

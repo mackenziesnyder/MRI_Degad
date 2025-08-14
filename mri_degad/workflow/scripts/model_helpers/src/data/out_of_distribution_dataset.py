@@ -8,6 +8,7 @@ def resample_to_original(volume, original_shape, was_resampled=False, view=None)
     """Resamples or unpads a volume back to original dimensions to ensure output corresponds to input."""
     if was_resampled:
         # Resample back to original shape
+        print(f"view: {view}")
         print(f"    Resampling from {volume.shape} to {original_shape}")
         volume_tensor = torch.from_numpy(volume).unsqueeze(0).unsqueeze(0)  # Add batch and channel dims
         volume_resampled = torch.nn.functional.interpolate(
@@ -61,7 +62,21 @@ def resample_to_original(volume, original_shape, was_resampled=False, view=None)
                     final_volume = final_volume[:, :, :original_shape[2]]
         
         print(f"    Unpadded shape: {final_volume.shape}")
-        return final_volume
+
+    if view == 'axial':
+        # Your dataset permuted axial slices with (2,0,1), so invert here
+        volume = np.transpose(volume, (1, 2, 0))  # from (slice, W, H) to (W, H, slice)
+    elif view == 'coronal':
+        # Dataset permuted coronal slices with (1,0,2)
+        volume = np.transpose(volume, (1, 0, 2))
+    elif view == 'sagittal':
+        # Sagittal may not be permuted, but check your dataset logic
+        # If no permutation used, no change needed
+        pass
+    else:
+        raise ValueError(f"Unknown view: {view}")
+    
+    return final_volume
 
 def _pad_and_crop_volume(vol):
     """Pad to (261, 263, 256) then center crop to (256, 256, 256) - matches training dataset."""

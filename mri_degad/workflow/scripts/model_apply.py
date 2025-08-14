@@ -48,7 +48,7 @@ def run_inference(view, data_path, checkpoint_path, config, output_path):
 
     # Convert to original space (if needed)
     was_resampled = test_dataset.motion_resampled
-    volume_original = resample_to_original(volume, test_dataset.ras_shape, was_resampled)
+    volume_original = resample_to_original(volume, test_dataset.ras_shape, was_resampled, view)
 
     # Save NIfTI if requested
     if output_path:

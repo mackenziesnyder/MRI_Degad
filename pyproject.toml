@@ -13,7 +13,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"
+python = ">=3.10,<3.12"
 snakemake = [
     { version=">=7.20,<8", python = "<3.11" },
     { version=">=8.1.2", python = ">=3.11" },
@@ -32,6 +32,8 @@ torchmetrics = "^1.6.3"
 pytorch-lightning = "^2.5.2"
 torchio = "^0.20.19"
 lpips = "^0.1.4"
+scikit-image = "^0.25.2"
+svgutils = "^0.3.4"
 
 [tool.poetry.scripts]
 mri_degad = "mri_degad.run:app.run"

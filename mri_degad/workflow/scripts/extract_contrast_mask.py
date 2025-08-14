@@ -11,42 +11,21 @@ def extract_contrast_mask_red_overlay(gad_img_path, degad_img_path, out_prob_pat
     gad_data = gad_img.get_fdata()
     degad_data = degad_img.get_fdata()
 
+    print("gad shape: ", gad_data.shape)
+    print("degad shape: ", degad_data.shape)
+
     if gad_data.shape != degad_data.shape:
-        raise ValueError("Input images must have the same shape. Please verify registration is correct.")
+        print(f"gad shape: {gad_data.shape} is not the same as degad shape: {degad_data.shape}")
+    else:
+        # subtract values
+        enhancement = gad_data - degad_data
 
-    # subtract values
-    enhancement = gad_data - degad_data
+        # threshold to extract vasculature
+        lower, upper = np.percentile(enhancement, [98, 99.9])
+        prob_map = np.clip((enhancement - lower) / (upper - lower), 0, 1)
 
-    # threshold to extract vasculature
-    lower, upper = np.percentile(enhancement, [98, 99.9])
-    prob_map = np.clip((enhancement - lower) / (upper - lower), 0, 1)
-
-    prob_nifti = nib.Nifti1Image(prob_map.astype(np.float32), gad_img.affine)
-    nib.save(prob_nifti, out_prob_path)
-
-    # Create RGB heatmap overlay (e.g., red channel scaled by prob_map)
-    # rgb_shape = prob_map.shape + (3,)
-    # rgb_img = np.zeros(rgb_shape, dtype=np.uint8)
-    # rgb_img[..., 0] = (prob_map * 255).astype(np.uint8)  # Red
-
-    # # Save RGB overlay
-    # rgb_nifti = nib.Nifti1Image(rgb_img, gad_img.affine)
-    # nib.save(rgb_nifti, out_rgb_path)
-    # threshold = np.percentile(enhancement, 99)
-    # vessel_mask = enhancement > threshold  # shape: (X, Y, Z)
-
-    # Create RGB image (X, Y, Z, 3)
-    # rgb_shape = vessel_mask.shape + (3,)
-    # rgb_img = np.zeros(rgb_shape, dtype=np.uint8)
-
-    # # Red: vessel pixels
-    # rgb_img[..., 0] = (vessel_mask * 255).astype(np.uint8)  # Red channel
-    # rgb_img[..., 1] = 0  # Green
-    # rgb_img[..., 2] = 0  # Blue
-
-    # # Save RGB NIfTI
-    # rgb_nifti = nib.Nifti1Image(rgb_img, gad_img.affine)
-    # nib.save(rgb_nifti, out_rgb_path)
+        prob_nifti = nib.Nifti1Image(prob_map.astype(np.float32), gad_img.affine)
+        nib.save(prob_nifti, out_prob_path)
 
 extract_contrast_mask_red_overlay(
     gad_img_path=snakemake.input.gad_img, 
