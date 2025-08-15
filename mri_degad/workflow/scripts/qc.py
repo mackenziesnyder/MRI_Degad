@@ -150,7 +150,7 @@ def output_html(gad_img, degad_img, output_html):
         degad_img,
         display_mode="z",
         draw_cross=False,
-        cut_coords=(-100,-80,-60,-40,-20,0), #taking slice close to centre, coronal, sagittal and frontal
+        cut_coords=(-40,-20,0,20,40,60), #taking slice close to centre, coronal, sagittal and frontal
         **plot_args_ref, # ** upacks the dict
     )
     fg_z_svgs = [fromstring(extract_svg(display_z, 300))]
@@ -191,7 +191,7 @@ def output_html(gad_img, degad_img, output_html):
         gad_img, #gad image
         display_mode="z",# displaying 6 cuts in each axis 
         draw_cross=False,
-        cut_coords=(-100,-80,-60,-40,-20,0),
+        cut_coords=(-40,-20,0,20,40,60),
         **plot_args_ref,
     )
     bg_z_svgs = [fromstring(extract_svg(display_z, 300))]#rescaling for gad (background)

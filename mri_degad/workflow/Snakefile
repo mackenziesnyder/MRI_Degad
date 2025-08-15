@@ -48,15 +48,6 @@ download_dir = get_download_dir()
 
 rule all:
     input:
-        # t1w_degad = inputs["t1w"].expand(bids(
-        #     root=work,
-        #     datatype="degad",
-        #     desc="degad",
-        #     res=config["res"],
-        #     suffix="T1w.nii.gz",
-        #     acq="gad",
-        #     **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        # ))
         mask_whole_image = inputs["t1w"].expand(bids(
             root=work,
             datatype="mask",
@@ -85,13 +76,13 @@ rule all:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )),
-        metrics_ss = bids(
+        metrics_ss = inputs["t1w"].expand(bids(
             root=work,
             datatype="analysis",
             suffix="metrics_ss.txt",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        )
+        ))
         
 include: "rules/preprocessing.smk"
 include: "rules/cnn.smk"
