@@ -47,15 +47,15 @@ def run_inference(view, data_path, checkpoint_path, config, output_path):
     volume = np.squeeze(volume)
 
     # Convert to original space (if needed)
-    was_resampled = test_dataset.motion_resampled
-    volume_original = resample_to_original(volume, test_dataset.ras_shape, was_resampled, view)
+    # was_resampled = test_dataset.motion_resampled
+    # volume_original = resample_to_original(volume, test_dataset.ras_shape, was_resampled, view)
 
     # Save NIfTI if requested
     if output_path:
-        nii_out = nib.Nifti1Image(volume_original.astype(np.float32), test_dataset.affine)
+        nii_out = nib.Nifti1Image(volume.astype(np.float32), test_dataset.affine)
         nib.save(nii_out, output_path)
 
-    return volume_original
+    return volume
 
 if __name__ == "__main__":
 

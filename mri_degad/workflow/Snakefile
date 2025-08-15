@@ -77,18 +77,24 @@ rule all:
             suffix="qc.html",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        ))
-        # metrics = inputs["t1w"].expand(bids(
-        #     root=work,
-        #     datatype="analysis",
-        #     suffix="metrics.txt",
-        #     acq="gad",
-        #     **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        # ))
+        )),
+        metrics = inputs["t1w"].expand(bids(
+            root=work,
+            datatype="analysis",
+            suffix="metrics.txt",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )),
+        metrics_ss = bids(
+            root=work,
+            datatype="analysis",
+            suffix="metrics_ss.txt",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
         
 include: "rules/preprocessing.smk"
 include: "rules/cnn.smk"
 include: "rules/postprocessing.smk"
 include: "rules/qc.smk"
-
-# include: "rules/analysis.smk"
+include: "rules/analysis.smk"

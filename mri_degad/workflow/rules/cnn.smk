@@ -35,7 +35,7 @@ rule apply_model_cornonal:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
-    script: '../scripts/cnn_apply_2.py'
+    script: '../scripts/model_apply.py'
 
 rule apply_model_axial:
     input:
@@ -62,7 +62,7 @@ rule apply_model_axial:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
-    script: '../scripts/cnn_apply_2.py'
+    script: '../scripts/model_apply.py'
 
 rule apply_model_sagittal:
     input:
