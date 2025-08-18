@@ -2,10 +2,42 @@ import torch
 import json
 import nibabel as nib
 import numpy as np
-import os
 from torch.utils.data import DataLoader
 from model_helpers.src.training.trainer_lightning import Model
 from model_helpers.src.data.out_of_distribution_dataset import NiftiTestDataset, resample_to_original
+
+def reconstruct_and_save(slice_dict, affine, view):
+    """Reconstructs and saves a volume from slices. Pads/crops each dimension to 256 if needed."""
+    if not slice_dict:
+        print(f"  [No slices found, skipping.")
+        return
+
+    slices_sorted = sorted(slice_dict, key=lambda item: item[0])
+    stack = np.stack([s[1] for s in slices_sorted], axis=0)
+    stack = np.squeeze(stack)
+
+    # Pad/crop each dimension to 256 if needed
+    new_shape = list(stack.shape)
+    pad_width = []
+    for i in range(3):
+        if new_shape[i] < 256:
+            pad_before = (256 - new_shape[i]) // 2
+            pad_after = 256 - new_shape[i] - pad_before
+            pad_width.append((pad_before, pad_after))
+        else:
+            pad_width.append((0, 0))
+    stack = np.pad(stack, pad_width, mode='constant')
+    # Crop if any dimension is greater than 256
+    stack = stack[0:256, 0:256, 0:256]
+
+    stack = stack.astype(np.float32)
+
+    if view == 'coronal':
+        stack = np.transpose(stack, (1, 0, 2))
+    elif view == 'axial':
+        stack = np.transpose(stack, (1, 2, 0))
+    nii_out = nib.Nifti1Image(stack, affine)
+    return nii_out
 
 def run_inference(view, data_path, checkpoint_path, config, output_path):
     
@@ -41,21 +73,15 @@ def run_inference(view, data_path, checkpoint_path, config, output_path):
 
         pred_slices.append((i, pred.squeeze().cpu().numpy()))
 
-    # Reconstruct volume from predicted slices
-    slices_sorted = sorted(pred_slices, key=lambda s: s[0])
-    volume = np.stack([s[1] for s in slices_sorted], axis=0)
-    volume = np.squeeze(volume)
-
-    # Convert to original space (if needed)
-    # was_resampled = test_dataset.motion_resampled
-    # volume_original = resample_to_original(volume, test_dataset.ras_shape, was_resampled, view)
+    pred_nii = reconstruct_and_save(pred_slices, test_dataset.affine, view)
+    pred_recon = pred_nii.get_fdata()
+    was_resampled = test_dataset.motion_resampled
+    pred_recon_original = resample_to_original(pred_recon, test_dataset.ras_shape, was_resampled)
 
     # Save NIfTI if requested
     if output_path:
-        nii_out = nib.Nifti1Image(volume.astype(np.float32), test_dataset.affine)
+        nii_out = nib.Nifti1Image(pred_recon_original.astype(np.float32), test_dataset.affine)
         nib.save(nii_out, output_path)
-
-    return volume
 
 if __name__ == "__main__":
 

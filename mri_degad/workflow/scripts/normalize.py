@@ -2,6 +2,7 @@ import nibabel as nib
 
 def normalize(input_im, output_im):
     """Normalize MRI image"""
+    
     nii = nib.load(input_im)
     nii_affine = nii.affine
     nii_data = nii.get_fdata()

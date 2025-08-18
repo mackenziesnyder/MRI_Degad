@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-#using afids/afids-auto/afids-auto-train/workflow/scripts/reg_qc.py script
 # -*- coding: utf-8 -*-
 import os
 import re

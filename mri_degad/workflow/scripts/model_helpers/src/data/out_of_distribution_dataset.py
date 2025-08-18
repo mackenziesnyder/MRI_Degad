@@ -8,8 +8,6 @@ def resample_to_original(volume, original_shape, was_resampled=False, view=None)
     """Resamples or unpads a volume back to original dimensions to ensure output corresponds to input."""
     if was_resampled:
         # Resample back to original shape
-        print(f"view: {view}")
-        print(f"    Resampling from {volume.shape} to {original_shape}")
         volume_tensor = torch.from_numpy(volume).unsqueeze(0).unsqueeze(0)  # Add batch and channel dims
         volume_resampled = torch.nn.functional.interpolate(
             volume_tensor,
@@ -18,12 +16,10 @@ def resample_to_original(volume, original_shape, was_resampled=False, view=None)
             align_corners=True,
             # antialias=True
         ).squeeze(0).squeeze(0).numpy()  # Remove batch and channel dims
-        print(f"    Resampled shape: {volume_resampled.shape}")
         return volume_resampled
     else:
         # Unpad to original shape - reverse the padding/cropping from training
-        print(f"    Unpadding from {volume.shape} to {original_shape}")
-        
+     
         # The training dataset does:
         # 1. Pad to (261, 263, 256) 
         # 2. Center crop to (256, 256, 256)
@@ -41,8 +37,6 @@ def resample_to_original(volume, original_shape, was_resampled=False, view=None)
         # Create a larger volume filled with zeros (the padded size)
         unpadded_volume = np.zeros(target_shape, dtype=volume.dtype)
         
-        for i in range(3):
-            end[i] = start[i] + volume.shape[i]
         # Place the cropped volume back in the center
         unpadded_volume[start[0]:end[0], start[1]:end[1], start[2]:end[2]] = volume
         
@@ -62,21 +56,7 @@ def resample_to_original(volume, original_shape, was_resampled=False, view=None)
                     final_volume = final_volume[:, :, :original_shape[2]]
         
         print(f"    Unpadded shape: {final_volume.shape}")
-
-    if view == 'axial':
-        # Your dataset permuted axial slices with (2,0,1), so invert here
-        volume = np.transpose(volume, (1, 2, 0))  # from (slice, W, H) to (W, H, slice)
-    elif view == 'coronal':
-        # Dataset permuted coronal slices with (1,0,2)
-        volume = np.transpose(volume, (1, 0, 2))
-    elif view == 'sagittal':
-        # Sagittal may not be permuted, but check your dataset logic
-        # If no permutation used, no change needed
-        pass
-    else:
-        raise ValueError(f"Unknown view: {view}")
-    
-    return final_volume
+        return final_volume
 
 def _pad_and_crop_volume(vol):
     """Pad to (261, 263, 256) then center crop to (256, 256, 256) - matches training dataset."""
@@ -91,21 +71,6 @@ def _pad_and_crop_volume(vol):
     vol = vol[start[0]:end[0], start[1]:end[1], start[2]:end[2]]
     return vol
 
-# def _get_nifti_path(data_path, subject, number_of_motion):
-#     """Get NIfTI paths using the same structure as training dataset for DEGAD."""
-#     base_path = os.path.join(data_path, subject, 'ses-pre', 'normalize')
-    
-#     # For DEGAD: we have GAD (input) and Non-GAD (ground truth)
-#     # The training dataset uses GAD as input and Non-GAD as target
-#     gad_path = os.path.join(base_path, f'{subject}_ses-pre_acq-gad_run-01_desc-normalize_minmax_T1w.nii.gz')
-#     nongad_path = os.path.join(base_path, f'{subject}_ses-pre_acq-nongad_run-01_desc-normalized_zscore_T1w.nii.gz')
-    
-#     # For inference, we'll use GAD as the input volume and Non-GAD as ground truth
-#     if os.path.exists(gad_path) and os.path.exists(nongad_path):
-#         return nongad_path, gad_path  # Return (ground_truth, input) for consistency
-#     else:
-#         return None, None
-
 class NiftiTestDataset(Dataset):
     """
     A PyTorch Dataset for testing that loads a single subject's GAD volume,
@@ -119,15 +84,6 @@ class NiftiTestDataset(Dataset):
         self.view = view.lower()
         self.enable_sap = enable_sap
 
-        # Load, normalize, and process the volumes using EXACT same logic as training dataset
-        # free_path, motion_path = _get_nifti_path(data_path, subject_id, motion_idx)
-        # print(f"[DEBUG] Subject: {subject_id}")
-        # print(f"[DEBUG] Checking GAD path: {motion_path}, exists: {os.path.exists(motion_path) if motion_path else 'N/A'}")
-        # print(f"[DEBUG] Checking Non-GAD (ground truth) path: {free_path}, exists: {os.path.exists(free_path) if free_path else 'N/A'}")
-        # if not motion_path:
-        #     raise FileNotFoundError(f"Could not find GAD NIfTI file for subject {subject_id}")
-
-        # Load GAD volume (input) - required - EXACT same as training
         motion_img = tio.ScalarImage(image_path)
         self.affine = motion_img.affine
         self.ras_shape = motion_img.shape[1:]  # Original (W, H, D)
@@ -136,17 +92,6 @@ class NiftiTestDataset(Dataset):
         self.motion_padded = _pad_and_crop_volume(motion_vol)  # EXACT same padding/cropping
         self.motion_resampled = False  # We use padding/cropping, not resampling
 
-        # Load Non-GAD volume (ground truth) - optional for testing - EXACT same as training
-        # if free_path and os.path.exists(free_path):
-        #     # print(f"[DEBUG] Ground truth found for subject {subject_id} at {free_path}")
-        #     free_img = tio.ScalarImage(free_path)
-        #     free_vol = free_img.data.squeeze(0)  # EXACT same as training
-        #     free_vol = (free_vol - free_vol.min()) / (free_vol.max() - free_vol.min() + 1e-8)  # EXACT same normalization
-        #     self.free_padded = _pad_and_crop_volume(free_vol)  # EXACT same padding/cropping
-        #     self.free_resampled = False
-        #     self.has_ground_truth = True
-        # else:
-        # print(f"[DEBUG] Ground truth NOT found for subject {subject_id}. Path checked: {free_path}")
         self.free_padded = torch.zeros_like(self.motion_padded)
         self.free_resampled = False
         self.has_ground_truth = False

@@ -1,17 +1,6 @@
 import nibabel as nib
 import numpy as np
-from nibabel.processing import resample_from_to
 from scipy.ndimage import median_filter
-
-def undo_permutation(volume, view):
-    if view == 'axial':
-        return np.transpose(volume, (1, 2, 0))  # inverse of (2,0,1)
-    elif view == 'coronal':
-        return np.transpose(volume, (1, 0, 2))  # inverse of (1,0,2)
-    elif view == 'sagittal':
-        return volume  # no permutation
-    else:
-        raise ValueError(f"Unknown view: {view}")
 
 def fuse_image(coronal, axial, sagittal, output):
     
@@ -20,22 +9,9 @@ def fuse_image(coronal, axial, sagittal, output):
     coronal_img = nib.load(coronal)
     sagittal_img = nib.load(sagittal)
 
-    axial_data = undo_permutation(axial_img.get_fdata(), 'axial')
-    coronal_data = undo_permutation(coronal_img.get_fdata(), 'coronal')
-    sagittal_data = undo_permutation(sagittal_img.get_fdata(), 'sagittal')
-    
-    # Wrap back into NIfTI objects (keep affine from axial as target space)
-    axial_img_fixed = nib.Nifti1Image(axial_data, affine=axial_img.affine)
-    coronal_img_fixed = nib.Nifti1Image(coronal_data, affine=coronal_img.affine)
-    sagittal_img_fixed = nib.Nifti1Image(sagittal_data, affine=sagittal_img.affine)
-
-    # Resample coronal & sagittal to match axial voxel grid
-    coronal_resampled = resample_from_to(coronal_img_fixed, axial_img_fixed)
-    sagittal_resampled = resample_from_to(sagittal_img_fixed, axial_img_fixed)
-
-    axial_data = axial_img_fixed.get_fdata()
-    coronal_data = coronal_resampled.get_fdata()
-    sagittal_data = sagittal_resampled.get_fdata()
+    axial_data = axial_img.get_fdata()
+    coronal_data = coronal_img.get_fdata()
+    sagittal_data = sagittal_img.get_fdata()
 
     Dx, Dy, Dz = axial_data.shape
     eps = 1e-3
@@ -100,7 +76,7 @@ def fuse_image(coronal, axial, sagittal, output):
 
             # Fuse results
             mean_fused = (corrected_axial + corrected_sagittal + corrected_coronal) / 3
-            median_fused = np.median(np.stack([corrected_axial, corrected_sagittal, corrected_coronal]), axis=0)
+            # median_fused = np.median(np.stack([corrected_axial, corrected_sagittal, corrected_coronal]), axis=0)
 
     fused_img = nib.Nifti1Image(mean_fused, affine=axial_img.affine, header=axial_img.header)
     nib.save(fused_img, output)

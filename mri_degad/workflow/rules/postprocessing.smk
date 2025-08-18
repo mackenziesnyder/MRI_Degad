@@ -103,14 +103,14 @@ rule skull_strip_gad:
 
 rule register_degad_to_gad:
     input:
-        fixed_gad = bids(
+        fixed_im = bids(
             root=str(Path(config["bids_dir"])),
             datatype="anat",
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        moving_degad = bids(
+        moving_im = bids(
             root=work,
             datatype="degad",
             desc="fused",
@@ -132,7 +132,7 @@ rule register_degad_to_gad:
 
 rule register_degad_to_gad_skull_stripped:
     input:
-        fixed_gad = bids(
+        fixed_im = bids(
             root=work,
             datatype="skull_stripped",
             desc="gad_skull_stripped",
@@ -140,7 +140,7 @@ rule register_degad_to_gad_skull_stripped:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        moving_degad = bids(
+        moving_im = bids(
             root=work,
             datatype="skull_stripped",
             desc="degad_skull_stripped",

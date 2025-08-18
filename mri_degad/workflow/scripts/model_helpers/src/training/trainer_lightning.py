@@ -25,7 +25,7 @@ import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 from torch.utils.data import DataLoader
-from src.data.dataloader import NiftiSliceDataset
+from src.data.dataset import NiftiSliceDataset
 from src.utils.losses import PerceptualLoss, ssim_loss, ms_ssim_loss, mae_loss, mse_loss
 from src.utils.metrics import psnr, ssim_score, ms_ssim_score, mse_metric, mae_metric
 from src.utils.adaptive_losses import AdaMultiLossesNormTorch

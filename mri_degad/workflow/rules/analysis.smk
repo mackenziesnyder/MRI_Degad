@@ -34,14 +34,14 @@ rule skull_strip_nongad:
 
 rule register_degad_to_nongad:
     input:
-        fixed_gad = bids(
+        fixed_im = bids(
             root=str(Path(config["bids_dir"])),
             datatype="anat",
             suffix="T1w.nii.gz",
             acq="nongad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        moving_degad =  bids(
+        moving_im =  bids(
             root=work,
             datatype="degad",
             desc="fused",
@@ -63,7 +63,7 @@ rule register_degad_to_nongad:
 
 rule register_degad_to_nongad_skull_stripped:
     input:
-        fixed_gad = bids(
+        fixed_im = bids(
             root=work,
             datatype="skull_stripped",
             desc="nongad_skull_stripped",
@@ -71,7 +71,7 @@ rule register_degad_to_nongad_skull_stripped:
             acq="nongad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        moving_degad =  bids(
+        moving_im =  bids(
             root=work,
             datatype="skull_stripped",
             desc="degad_skull_stripped",
@@ -145,3 +145,58 @@ rule calculate_metrics_skull_stripped:
         )
     script:
         "../scripts/calculate_metrics.py" 
+
+rule nongad_degad_qc:
+    input:
+        gad_img = bids(
+            root=str(Path(config["bids_dir"])),
+            datatype="anat",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
+        degad_img = bids(
+            root=work,
+            datatype="registration",
+            desc="degad_to_gad",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
+    output:
+        out_html = bids(
+            root=work,
+            datatype="qc",
+            suffix="qc_nongad_to_degad.html",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script:
+        "../scripts/qc.py" 
+
+rule nongad_degad_skull_stripped_qc:
+    input:
+        gad_img = bids(
+            root=work,
+            datatype="skull_stripped",
+            desc="nongad_skull_stripped",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
+        degad_img = bids(
+            root=work,
+            datatype="registration",
+            desc="degad_to_nongad_skull_stripped",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    output:
+        out_html = bids(
+            root=work,
+            datatype="qc",
+            suffix="qc_nongad_to_degad_skull_stripped.html",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script:
+        "../scripts/qc.py" 

@@ -6,15 +6,12 @@ def resample_to_isotropic_resolution(
     input_image_path, output_img
 ):
     """
-    Resample a NIfTI MRI image to the specified isotropic resolution.
+    Resample a NIfTI MRI image to the 1mm isotropic resolution.
 
     Parameters
     ----------
         input_image_path:: str
             Path to the NIfTI MRI image file.
-
-        isotropic_resolution:: float
-            The desired isotropic resolution in mm.
 
         output_img :: str
             Name of the modified image
