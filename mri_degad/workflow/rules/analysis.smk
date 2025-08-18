@@ -1,7 +1,7 @@
 
 # calculate MAE, PSNR, SSIM
 
-rule skull_strip_nogad:
+rule skull_strip_nongad:
     input:
         in_img = bids(
             root=str(Path(config["bids_dir"])),
@@ -16,16 +16,23 @@ rule skull_strip_nogad:
             datatype="skull_stripped",
             desc="nongad_skull_stripped",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="nongad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-            ),
+        ),
     resources:
-        mem_mb = 8000
-    threads: 4
+        mem_mb = 8000,
+        gpus=1 if config["use_gpu"] else 0,
+    threads: 8
+    log:
+        bids(
+            root="logs",
+            suffix="skull_strip_nongad.txt",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
     shell:
-        "mri_synthstrip -i {input.in_img} -o {output.out_im_skull_stripped}"
+        "mri_synthstrip -i {input.in_img} -o {output.out_im_skull_stripped} &>{log}"
 
-rule register_degad_and_nogad_whole_image:
+rule register_degad_to_nongad:
     input:
         fixed_gad = bids(
             root=str(Path(config["bids_dir"])),
@@ -36,32 +43,32 @@ rule register_degad_and_nogad_whole_image:
         ),
         moving_degad =  bids(
             root=work,
-            datatype="denoised",
-            desc="degad",
+            datatype="degad",
+            desc="fused",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     output:
         out_im = bids(
             root=work,
             datatype="registration",
-            desc="degad_reg_nogad",
+            desc="degad_to_nongad",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     script:
         "../scripts/registration.py"
 
-rule register_degad_and_nogad_ss:
+rule register_degad_to_nongad_skull_stripped:
     input:
         fixed_gad = bids(
             root=work,
             datatype="skull_stripped",
             desc="nongad_skull_stripped",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="nongad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
         moving_degad =  bids(
@@ -69,16 +76,16 @@ rule register_degad_and_nogad_ss:
             datatype="skull_stripped",
             desc="degad_skull_stripped",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     output:
         out_im = bids(
             root=work,
             datatype="registration",
-            desc="degad_reg_nogad_ss",
+            desc="degad_to_nongad_skull_stripped",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     script:
@@ -96,9 +103,9 @@ rule calculate_metrics:
         degad = bids(
             root=work,
             datatype="registration",
-            desc="degad_reg_nogad",
+            desc="degad_to_nongad",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     output:
@@ -106,36 +113,34 @@ rule calculate_metrics:
             root=work,
             datatype="analysis",
             suffix="metrics.txt",
-            acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     script:
         "../scripts/calculate_metrics.py" 
 
-rule calculate_metrics_ss:
+rule calculate_metrics_skull_stripped:
     input:
         nongad = bids(
             root=work,
             datatype="skull_stripped",
             desc="nongad_skull_stripped",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="nongad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
         degad = bids(
             root=work,
             datatype="registration",
-            desc="degad_reg_nogad_ss",
+            desc="degad_to_nongad_skull_stripped",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     output:
         metrics = bids(
             root=work,
             datatype="analysis",
-            suffix="metrics_ss.txt",
-            acq="gad",
+            suffix="metrics_skull_stripped.txt",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     script:

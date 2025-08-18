@@ -58,14 +58,14 @@ def get_final_output():
             root=work,
             datatype="mask",
             suffix="mask.nii.gz",
-            acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        )),
+        ))
+    ),
+    final.extend(
         inputs["t1w"].expand(bids(
             root=work,
             datatype="qc",
             suffix="qc.html",
-            acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )),
     )
@@ -74,8 +74,7 @@ def get_final_output():
                 inputs["t1w"].expand(bids(
                 root=work,
                 datatype="mask",
-                suffix="mask_skullstripped.nii.gz",
-                acq="gad",
+                suffix="mask_skull_stripped.nii.gz",
                 **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
             )),
         )
@@ -84,15 +83,15 @@ def get_final_output():
                 inputs["t1w"].expand(bids(
                 root=work,
                 datatype="analysis",
-                suffix="metrics.txt",
-                acq="gad",
-                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}`
-            )),
+                suffix="metrics_skull_stripped.txt",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            ))
+        ),
+        final.extend(
                 inputs["t1w"].expand(bids(
                 root=work,
                 datatype="analysis",
-                suffix="metrics_ss.txt",
-                acq="gad",
+                suffix="metrics_skull_stripped.txt",
                 **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
             ))
         )

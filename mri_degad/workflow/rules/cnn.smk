@@ -10,12 +10,12 @@ rule download_cnn_model:
         " unzip -q -d {output.unzip_dir} model.zip && "
         " rm model.zip"
 
-rule apply_model_cornonal:
+rule apply_model_coronal:
     input:
         t1w_gad = bids(
             root=work,
-            datatype="resampled",
-            desc="resampled",
+            datatype="normalize",
+            desc="normalize_minmax",
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -32,7 +32,7 @@ rule apply_model_cornonal:
             datatype="degad",
             desc="degad_coronal",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     script: '../scripts/model_apply.py'
@@ -41,8 +41,8 @@ rule apply_model_axial:
     input:
         t1w_gad = bids(
             root=work,
-            datatype="resampled",
-            desc="resampled",
+            datatype="normalize",
+            desc="normalize_minmax",
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -59,7 +59,7 @@ rule apply_model_axial:
             datatype="degad",
             desc="degad_axial",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     script: '../scripts/model_apply.py'
@@ -68,7 +68,8 @@ rule apply_model_sagittal:
     input:
         t1w_gad = bids(
             root=work,
-            datatype="resampled",
+            datatype="normalize",
+            desc="normalize_minmax",
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -85,7 +86,7 @@ rule apply_model_sagittal:
             datatype="degad",
             desc="degad_sagittal",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     script: '../scripts/model_apply.py'

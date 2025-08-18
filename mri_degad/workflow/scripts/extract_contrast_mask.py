@@ -11,9 +11,6 @@ def extract_contrast_mask_red_overlay(gad_img_path, degad_img_path, out_prob_pat
     gad_data = gad_img.get_fdata()
     degad_data = degad_img.get_fdata()
 
-    print("gad shape: ", gad_data.shape)
-    print("degad shape: ", degad_data.shape)
-
     if gad_data.shape != degad_data.shape:
         print(f"gad shape: {gad_data.shape} is not the same as degad shape: {degad_data.shape}")
     else:

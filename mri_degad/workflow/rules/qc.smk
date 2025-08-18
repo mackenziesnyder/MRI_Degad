@@ -1,18 +1,19 @@
 rule quality_control:
     input:
-        degad_img = bids(
+        gad_img = bids(
             root=work,
-            datatype="registration",
+            datatype="normalize",
+            desc="normalize_minmax",
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
-        gad_img = bids(
+        degad_img = bids(
             root=work,
-            datatype="resampled",
-            desc="resampled",
+            datatype="registration",
+            desc="degad_to_gad",
             suffix="T1w.nii.gz",
-            acq="gad",
+            acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ),
     output:
@@ -20,7 +21,6 @@ rule quality_control:
             root=work,
             datatype="qc",
             suffix="qc.html",
-            acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
     script:
