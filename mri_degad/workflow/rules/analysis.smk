@@ -38,7 +38,6 @@ rule register_degad_and_nogad_whole_image:
             root=work,
             datatype="denoised",
             desc="degad",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -69,7 +68,6 @@ rule register_degad_and_nogad_ss:
             root=work,
             datatype="skull_stripped",
             desc="degad_skull_stripped",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}

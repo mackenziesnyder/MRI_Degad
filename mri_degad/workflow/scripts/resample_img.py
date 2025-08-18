@@ -3,7 +3,7 @@ import numpy as np
 import nibabel as nib
 
 def resample_to_isotropic_resolution(
-    input_image_path, isotropic_resolution, output_img
+    input_image_path, output_img
 ):
     """
     Resample a NIfTI MRI image to the specified isotropic resolution.
@@ -38,6 +38,5 @@ def resample_to_isotropic_resolution(
 if __name__ == "__main__":
     resample_to_isotropic_resolution(
         input_image_path=snakemake.input["input_im"],
-        isotropic_resolution=snakemake.params["res"],
         output_img=snakemake.output["resam_im"],
     )

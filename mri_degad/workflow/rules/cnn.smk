@@ -16,7 +16,6 @@ rule apply_model_cornonal:
             root=work,
             datatype="resampled",
             desc="resampled",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -25,12 +24,13 @@ rule apply_model_cornonal:
     params:
         config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
         view = "coronal"
+    resources:
+        gpus=1 if config["use_gpu"] else 0,
     output: 
         degad_img = bids(
             root=work,
             datatype="degad",
             desc="degad_coronal",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -43,7 +43,6 @@ rule apply_model_axial:
             root=work,
             datatype="resampled",
             desc="resampled",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -52,12 +51,13 @@ rule apply_model_axial:
     params:
         config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
         view = "axial"
+    resources:
+        gpus=1 if config["use_gpu"] else 0,
     output: 
         degad_img = bids(
             root=work,
             datatype="degad",
             desc="degad_axial",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -69,8 +69,6 @@ rule apply_model_sagittal:
         t1w_gad = bids(
             root=work,
             datatype="resampled",
-            desc="resampled",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -79,12 +77,13 @@ rule apply_model_sagittal:
     params:
         config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
         view = "sagittal"
+    resources:
+        gpus=1 if config["use_gpu"] else 0,
     output: 
         degad_img = bids(
             root=work,
             datatype="degad",
             desc="degad_sagittal",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}

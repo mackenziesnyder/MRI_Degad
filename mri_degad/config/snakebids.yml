@@ -71,11 +71,6 @@ parse_args:
     default: 'default'
     required: false
 
-  # custom inputs 
-  --res:
-    help: 'Specify the resampling resolution (e.g. "100" for 1mm) for images, any resolution is supported but limited to isotropic resampling. (default: %(default)s)'
-    default: '100'  # Default to 1 
-
   --workdir:
     help: |
       Folder for storing working files. If not specified, will be in "work/" subfolder 
@@ -83,6 +78,24 @@ parse_args:
       workdir, e.g. --workdir '$SLURM_TMPDIR'.
     default: work
     type: str
+
+  --use_gpu:
+    help: 'Flag to run the model on gpu instead of the default cpu - will significantly speed up the model (default: %(default)s) '
+    default: False
+    action: store_true
+  
+  --skull_strip:
+    help: |
+      'Will run Freesurfer SynthStrip and produce a skull-stripped vasculature mask. Freesurfer must be installed and configured
+      according to the instructions in the SynthStrip documentation. See the readthedocs for more information. (default: %(default)s) '
+    default: False
+    action: store_true
+
+  --metrics:
+    help: 'Flag for preforming inference on degad model (default: %(default)s) '
+    default: False
+    action: store_true
+  
 
 singularity:
     itksnap: 'docker://pyushkevich/itksnap:latest'

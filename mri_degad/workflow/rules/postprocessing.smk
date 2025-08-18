@@ -4,7 +4,6 @@ rule fuse_image:
             root=work,
             datatype="degad",
             desc="degad_coronal",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -13,7 +12,6 @@ rule fuse_image:
             root=work,
             datatype="degad",
             desc="degad_axial",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -22,7 +20,6 @@ rule fuse_image:
             root=work,
             datatype="degad",
             desc="degad_sagittal",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -32,7 +29,6 @@ rule fuse_image:
             root=work,
             datatype="denoised",
             desc="degad",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -46,7 +42,6 @@ rule skull_strip_degad:
             root=work,
             datatype="denoised",
             desc="degad",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -56,7 +51,6 @@ rule skull_strip_degad:
             root=work,
             datatype="skull_stripped",
             desc="degad_skull_stripped",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -106,7 +100,6 @@ rule registration:
             root=work,
             datatype="denoised",
             desc="degad",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
@@ -136,7 +129,6 @@ rule registration_skullstripped:
             root=work,
             datatype="skull_stripped",
             desc="degad_skull_stripped",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}

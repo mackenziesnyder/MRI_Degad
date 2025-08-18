@@ -31,14 +31,11 @@ rule isotropic_resampling:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         ) 
-    params:
-        res=resolution
     output:
         resam_im = bids(
             root=work,
             datatype="resampled",
             desc="resampled",
-            res=config["res"],
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}

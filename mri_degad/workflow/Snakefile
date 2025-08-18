@@ -33,7 +33,6 @@ wildcard_constraints:
 
 root = os.path.expandvars(config["root"])
 work = os.path.expandvars(config["workdir"])
-resolution = float(config['res'])
 
 def get_download_dir():
     if "MRI_DEGAD_CACHE_DIR" in os.environ.keys():
@@ -46,46 +45,60 @@ def get_download_dir():
 
 download_dir = get_download_dir()
 
-rule all:
-    input:
-        mask_whole_image = inputs["t1w"].expand(bids(
+include: "rules/preprocessing.smk"
+include: "rules/cnn.smk"
+include: "rules/postprocessing.smk"
+include: "rules/qc.smk"
+include: "rules/analysis.smk"
+
+def get_final_output():
+    final = []
+    final.extend(
+        inputs["t1w"].expand(bids(
             root=work,
             datatype="mask",
             suffix="mask.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )),
-        mask_skull_stripped = inputs["t1w"].expand(bids(
-            root=work,
-            datatype="mask",
-            suffix="mask_skullstripped.nii.gz",
-            acq="gad",
-            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        )),
-        qc_plot = inputs["t1w"].expand(bids(
+        inputs["t1w"].expand(bids(
             root=work,
             datatype="qc",
             suffix="qc.html",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )),
-        metrics = inputs["t1w"].expand(bids(
-            root=work,
-            datatype="analysis",
-            suffix="metrics.txt",
-            acq="gad",
-            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        )),
-        metrics_ss = inputs["t1w"].expand(bids(
-            root=work,
-            datatype="analysis",
-            suffix="metrics_ss.txt",
-            acq="gad",
-            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        ))
-        
-include: "rules/preprocessing.smk"
-include: "rules/cnn.smk"
-include: "rules/postprocessing.smk"
-include: "rules/qc.smk"
-include: "rules/analysis.smk"
+    )
+    if config["skull_strip"]:
+        final.extend(
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="mask",
+                suffix="mask_skullstripped.nii.gz",
+                acq="gad",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            )),
+        )
+    if config["metrics"]:
+        final.extend(
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="analysis",
+                suffix="metrics.txt",
+                acq="gad",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}`
+            )),
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="analysis",
+                suffix="metrics_ss.txt",
+                acq="gad",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            ))
+        )
+    return final
+
+
+rule all:
+    input:
+        get_final_output(),
