@@ -1,5 +1,5 @@
 
-# calculate MSE, MAE, PSNR, SSIM
+# calculate MAE, PSNR, SSIM
 
 rule skull_strip_nogad:
     input:
@@ -19,6 +19,9 @@ rule skull_strip_nogad:
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
             ),
+    resources:
+        mem_mb = 8000
+    threads: 4
     shell:
         "mri_synthstrip -i {input.in_img} -o {output.out_im_skull_stripped}"
 
