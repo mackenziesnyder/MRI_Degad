@@ -3,8 +3,8 @@ import json
 import nibabel as nib
 import numpy as np
 from torch.utils.data import DataLoader
-from model_helpers.src.training.trainer_lightning import Model
-from model_helpers.src.data.out_of_distribution_dataset import NiftiTestDataset, resample_to_original
+from model_helpers.model import Model
+from model_helpers.data import NiftiTestDataset, resample_to_original
 
 def reconstruct_and_save(slice_dict, affine, view):
     """Reconstructs and saves a volume from slices. Pads/crops each dimension to 256 if needed."""

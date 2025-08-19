@@ -1,9 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from src.models.utils.cbam import CBAM
-from src.models.utils.wat import MultiLevelWaveletTransform, WATLayer
+from model_helpers.cbam import CBAM
+from model_helpers.wat import MultiLevelWaveletTransform, WATLayer
 
 class WATUNet(nn.Module):
     def __init__(self, in_channels):
@@ -95,25 +94,3 @@ class WATStackedUNets(nn.Module):
         pred2 = self.unet2(combined2)
         
         return pred2
-
-if __name__ == "__main__":
-    model = WATStackedUNets()
-    inputs = [torch.randn(1, 1, 256, 256) for _ in range(3)]
-    output = model(*inputs)
-    print(f"Input shapes: {[x.shape for x in inputs]}")
-    print(f"Output shape: {output.shape}")
-    
-    num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"Number of trainable parameters: {num_params:,}")
-
-    # PyTorch 'compile' equivalent
-    # Define loss function
-    criterion = nn.MSELoss()  # or another appropriate loss
-
-    # Define optimizer
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
-
-    # (Optional) Learning rate scheduler
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1)
-
-    print("Model, loss function, optimizer, and scheduler are set up and ready for training!") 

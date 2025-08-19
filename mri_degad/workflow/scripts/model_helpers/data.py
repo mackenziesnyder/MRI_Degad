@@ -4,59 +4,46 @@ import torchio as tio
 from torch.utils.data import Dataset
 import numpy as np
 
-def resample_to_original(volume, original_shape, was_resampled=False, view=None):
+def resample_to_original(volume, original_shape):
     """Resamples or unpads a volume back to original dimensions to ensure output corresponds to input."""
-    if was_resampled:
-        # Resample back to original shape
-        volume_tensor = torch.from_numpy(volume).unsqueeze(0).unsqueeze(0)  # Add batch and channel dims
-        volume_resampled = torch.nn.functional.interpolate(
-            volume_tensor,
-            size=original_shape,
-            mode='trilinear',
-            align_corners=True,
-            # antialias=True
-        ).squeeze(0).squeeze(0).numpy()  # Remove batch and channel dims
-        return volume_resampled
-    else:
-        # Unpad to original shape - reverse the padding/cropping from training
-     
-        # The training dataset does:
-        # 1. Pad to (261, 263, 256) 
-        # 2. Center crop to (256, 256, 256)
-        # We need to reverse this process
-        
-        # Step 1: Reverse the center cropping
-        # The center crop takes the middle 256x256x256 from the padded volume
-        target_shape = (261, 263, 256)  # Original padded shape
-        crop_shape = (256, 256, 256)    # What was cropped to
-        
-        # Calculate the crop start positions that were used during training
-        start = [(target_shape[i] - crop_shape[i]) // 2 for i in range(3)]
-        end = [start[i] + crop_shape[i] for i in range(3)]
-        
-        # Create a larger volume filled with zeros (the padded size)
-        unpadded_volume = np.zeros(target_shape, dtype=volume.dtype)
-        
-        # Place the cropped volume back in the center
-        unpadded_volume[start[0]:end[0], start[1]:end[1], start[2]:end[2]] = volume
-        
-        # Step 2: Remove the padding to get back to original dimensions
-        # Calculate how much padding was added during training
-        pad_needed = [(0, max(0, target_shape[i] - original_shape[i])) for i in range(3)]
-        
-        # Remove the padding from each dimension
-        final_volume = unpadded_volume
-        for i in range(3):
-            if pad_needed[i][1] > 0:  # If padding was added
-                if i == 0:  # Width dimension
-                    final_volume = final_volume[:original_shape[0], :, :]
-                elif i == 1:  # Height dimension
-                    final_volume = final_volume[:, :original_shape[1], :]
-                elif i == 2:  # Depth dimension
-                    final_volume = final_volume[:, :, :original_shape[2]]
-        
-        print(f"    Unpadded shape: {final_volume.shape}")
-        return final_volume
+    # Unpad to original shape - reverse the padding/cropping from training
+    
+    # The training dataset does:
+    # 1. Pad to (261, 263, 256) 
+    # 2. Center crop to (256, 256, 256)
+    # We need to reverse this process
+    
+    # Step 1: Reverse the center cropping
+    # The center crop takes the middle 256x256x256 from the padded volume
+    target_shape = (261, 263, 256)  # Original padded shape
+    crop_shape = (256, 256, 256)    # What was cropped to
+    
+    # Calculate the crop start positions that were used during training
+    start = [(target_shape[i] - crop_shape[i]) // 2 for i in range(3)]
+    end = [start[i] + crop_shape[i] for i in range(3)]
+    
+    # Create a larger volume filled with zeros (the padded size)
+    unpadded_volume = np.zeros(target_shape, dtype=volume.dtype)
+    
+    # Place the cropped volume back in the center
+    unpadded_volume[start[0]:end[0], start[1]:end[1], start[2]:end[2]] = volume
+    
+    # Step 2: Remove the padding to get back to original dimensions
+    # Calculate how much padding was added during training
+    pad_needed = [(0, max(0, target_shape[i] - original_shape[i])) for i in range(3)]
+    
+    # Remove the padding from each dimension
+    final_volume = unpadded_volume
+    for i in range(3):
+        if pad_needed[i][1] > 0:  # If padding was added
+            if i == 0:  # Width dimension
+                final_volume = final_volume[:original_shape[0], :, :]
+            elif i == 1:  # Height dimension
+                final_volume = final_volume[:, :original_shape[1], :]
+            elif i == 2:  # Depth dimension
+                final_volume = final_volume[:, :, :original_shape[2]]
+    
+    return final_volume
 
 def _pad_and_crop_volume(vol):
     """Pad to (261, 263, 256) then center crop to (256, 256, 256) - matches training dataset."""
@@ -78,9 +65,6 @@ class NiftiTestDataset(Dataset):
     Supports 'mix' mode for inference: if view='mix', the dataset will contain slices from all three views (axial, sagittal, coronal).
     """
     def __init__(self,  view, image_path, enable_sap=True):
-        valid_views = ['axial', 'sagittal', 'coronal', 'mix']
-        if view not in valid_views:
-            raise ValueError(f"Invalid view '{view}' for NiftiTestDataset. Must be one of: {valid_views}.")
         self.view = view.lower()
         self.enable_sap = enable_sap
 
@@ -102,26 +86,16 @@ class NiftiTestDataset(Dataset):
     def _build_slice_tuples(self):
         slice_tuples = []
         W, H, D = self.motion_padded.shape
-        if self.view == 'mix':
-            # EXACT same slice range as training dataset
-            for slice_id in range(1, D - 2):
-                slice_tuples.append(('axial', slice_id))
-            for slice_id in range(1, W - 2):
-                slice_tuples.append(('sagittal', slice_id))
-            for slice_id in range(1, H - 2):
-                slice_tuples.append(('coronal', slice_id))
-        else:
-            if self.view == 'sagittal':
-                num_slices = W
-            elif self.view == 'coronal':
-                num_slices = H
-            elif self.view == 'axial':
-                num_slices = D
-            else:
-                raise ValueError(f"Unknown view: {self.view}")
-            # EXACT same slice range as training dataset
-            for slice_id in range(1, num_slices - 2):
-                slice_tuples.append((self.view, slice_id))
+        if self.view == 'sagittal':
+            num_slices = W
+        elif self.view == 'coronal':
+            num_slices = H
+        elif self.view == 'axial':
+            num_slices = D
+
+        # EXACT same slice range as training dataset
+        for slice_id in range(1, num_slices - 2):
+            slice_tuples.append((self.view, slice_id))
         return slice_tuples
 
     def __len__(self):
