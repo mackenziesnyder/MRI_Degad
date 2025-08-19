@@ -91,12 +91,6 @@ parse_args:
     default: False
     action: store_true
 
-  --metrics:
-    help: 'Flag for preforming inference on degad model (default: %(default)s) '
-    default: False
-    action: store_true
-  
-
 singularity:
     itksnap: 'docker://pyushkevich/itksnap:latest'
 
