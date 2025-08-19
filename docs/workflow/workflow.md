@@ -14,6 +14,11 @@ with arrows representing the connections (i.e. inputs / outputs) to these rules.
 
 ![workflow](../images/dag.svg)
 
+1. Preprocess input NIfTI T1w gadolinium enhanced files (n4 bias correction, isotropic 1mm voxel resampling, min/max normalization)
+2. Download and apply the Degad model in the axial, sagittal, and coronal direction
+3. Fuse the image 
+4. Register the degad fused image to the gad image
+5. Extract the vasculature mask
 
 ## Apply
 Use the classic BIDS App syntax to generate vascular maps between the gad and degad image and a qc plot between the gad and degad image. For other derivative outputs, the following flag is supported: 

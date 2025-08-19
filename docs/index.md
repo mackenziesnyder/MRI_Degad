@@ -22,8 +22,26 @@ getting_started/installation
 :hidden:
 :maxdepth: 1
 
-usage/app_cli
-usage/snakemake_cli
+usage/cli
+usage/run
+```
+
+```{toctree}
+:caption: Workflow
+:name: workflow
+:hidden:
+:maxdepth: 1
+
+workflow/workflow
+```
+
+```{toctree}
+:caption: Outputs
+:name: outputs
+:hidden:
+:maxdepth: 1
+
+outputs/output_files
 ```
 
 ```{toctree}

@@ -13,7 +13,7 @@ rule skull_strip_nongad:
     output:
         out_im_skull_stripped = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="nongad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="nongad",
@@ -65,7 +65,7 @@ rule register_degad_to_nongad_skull_stripped:
     input:
         fixed_im = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="nongad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="nongad",
@@ -73,7 +73,7 @@ rule register_degad_to_nongad_skull_stripped:
         ),
         moving_im =  bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="degad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="degad",
@@ -122,7 +122,7 @@ rule calculate_metrics_skull_stripped:
     input:
         nongad = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="nongad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="nongad",
@@ -177,7 +177,7 @@ rule nongad_degad_skull_stripped_qc:
     input:
         gad_img = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="nongad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="nongad",

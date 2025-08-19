@@ -49,7 +49,7 @@ rule skull_strip_degad:
     output:
         out_im_skull_stripped = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="degad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="degad",
@@ -81,7 +81,7 @@ rule skull_strip_gad:
     output:
         out_im_skull_stripped = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="gad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="gad",
@@ -134,7 +134,7 @@ rule register_degad_to_gad_skull_stripped:
     input:
         fixed_im = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="gad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="gad",
@@ -142,7 +142,7 @@ rule register_degad_to_gad_skull_stripped:
         ),
         moving_im = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="degad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="degad",
@@ -180,7 +180,7 @@ rule extract_vasc_mask:
     output:
         out_mask = bids(
             root=work,
-            datatype="mask",
+            datatype="vasc_mask",
             suffix="mask.nii.gz",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )
@@ -191,7 +191,7 @@ rule extract_vasc_mask_skull_stripped:
     input:
         gad_img = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="gad_skull_stripped",
             acq="gad",
             suffix="T1w.nii.gz",
@@ -208,7 +208,7 @@ rule extract_vasc_mask_skull_stripped:
     output:
         out_mask = bids(
             root=work,
-            datatype="mask",
+            datatype="vasc_mask",
             suffix="mask_skull_stripped.nii.gz",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
         )

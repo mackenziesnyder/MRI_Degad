@@ -11,7 +11,7 @@ rule n4_bias_correction:
     output:
         corrected_im = bids(
             root=work,
-            datatype="bias_correction",
+            datatype="n4biascorr",
             desc="n4_bias_corr",
             suffix="T1w.nii.gz",
             acq="gad",
@@ -25,7 +25,7 @@ rule isotropic_resampling:
     input:
         input_im = bids(
             root=work,
-            datatype="bias_correction",
+            datatype="n4biascorr",
             desc="n4_bias_corr",
             suffix="T1w.nii.gz",
             acq="gad",
@@ -34,7 +34,7 @@ rule isotropic_resampling:
     output:
         resam_im = bids(
             root=work,
-            datatype="resampled",
+            datatype="resample",
             desc="resampled",
             suffix="T1w.nii.gz",
             acq="gad",
@@ -48,7 +48,7 @@ rule normalize_minmax:
     input:
         input_im = bids(
             root=work,
-            datatype="resampled",
+            datatype="resample",
             desc="resampled",
             suffix="T1w.nii.gz",
             acq="gad",

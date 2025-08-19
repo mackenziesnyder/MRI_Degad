@@ -29,7 +29,7 @@ rule quality_control_skull_stripped:
     input:
         gad_img = bids(
             root=work,
-            datatype="skull_stripped",
+            datatype="skull_strip",
             desc="gad_skull_stripped",
             suffix="T1w.nii.gz",
             acq="gad",
