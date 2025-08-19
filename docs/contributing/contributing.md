@@ -42,20 +42,5 @@ uv run poe quality-check
 uv run poe quality
 ```
 
-## Dry-run / testing your workflow
-
-Using Snakemake\'s dry-run option (`--dry-run`/`-n`) is an easy way to verify
-any changes made to the workflow are working direcctly. The `tests/data` folder 
-contains a _fake_ BIDS dataset (i.e. dataset with zero-sized files) that is 
-useful for verifying different aspects of the workflow. These dry-run tests are 
-part of the automated Github actions that are run for every commit.
-
-```
-mri_degad tests/data /test/data/derivatives participant --cores all -n
-```
-
-This performs the baseline test, in which a user
-may use mri_degad.
-
 ## Questions, Issues, Suggestions, and Other Feedback
 Please reach out if you have any questions, suggestions, or other feedback related to this software—either through email (m25snyde@uwaterloo.ca) or the discussions page.

@@ -77,6 +77,14 @@ def get_final_output():
                 suffix="mask_skull_stripped.nii.gz",
                 **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
             )),
+        ),
+        final.extend(
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="qc",
+                suffix="qc_skull_stripped.html",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            )),
         )
     if config["metrics"]:
         final.extend(

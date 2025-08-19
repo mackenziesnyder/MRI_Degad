@@ -1,4 +1,4 @@
-rule fuse_image:
+rule fuse_degad_image:
     input:
         degad_coronal = bids(
             root=work,
@@ -77,7 +77,7 @@ rule skull_strip_gad:
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-            ),
+        ),
     output:
         out_im_skull_stripped = bids(
             root=work,
