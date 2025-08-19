@@ -2,8 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/mri_degad/badge/?version=latest)](https://mri-degad.readthedocs.io/en/stable/?badge=stable)
 ![Version](https://img.shields.io/github/v/tag/mackenziesnyder/mri_degad?label=version)
 ![Python3](https://img.shields.io/badge/python-_3.10_|_3.11_|_3.12-blue.svg)
-![Tests](https://github.com/afids/autoafids/actions/workflows/lint-and-dryrun-testing.yml/badge.svg?branch=main)
-![Docker Pulls](https://img.shields.io/docker/pulls/jclauneurolab/autoafids)
+![Tests](https://github.com/mackenziesnyder/MRI_Degad/actions/workflows/lint_and_test.yml/badge.svg?branch=main)
 
 AIMS Lab Research Team at the Robarts Research Institute - 2024-2025
 
