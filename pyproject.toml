@@ -47,3 +47,24 @@ dev = [
 [build-system]
 requires = ["hatchling>=1.21.1"]
 build-backend = "hatchling.build"
+
+[tool.poe.tasks]
+quality_check = { shell = "isort nnunet_contact_seg/*.py -c && black nnunet_contact_seg --check && snakefmt nnunet_contact_seg --check" }
+quality_fix = { shell = "isort nnunet_contact_seg/*.py && black nnunet_contact_seg  && snakefmt nnunet_contact_seg" }
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.pylint.master]
+ignore-patterns = "^[0-9][0-9]+_,^test_"
+
+[tool.pylint.format]
+good-names = "i,j,k,ex,_,x,y,f,d"
+
+[tool.pylint.messages_control]
+disable = """
+    missing-function-docstring,
+    missing-module-docstring,
+    fixme
+"""
