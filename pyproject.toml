@@ -1,49 +1,49 @@
-[tool.poetry]
+[project]
 name = "mri_degad"
 version = "0.1.0"
-description = "Convulutional neural network the conversion of gadolinium-enhanced T1-weighted MRI to non-gadolinium T1-weighted scans"
+description = "Convolutional neural network for conversion of gadolinium-enhanced T1-weighted MRI to non-gadolinium T1-weighted scans"
 readme = "README.md"
-license = "MIT"
+license = { text = "MIT" }
 authors = [
-    "mackenziesnyder <masnyder2@hotmail.com>"
+    { name = "mackenziesnyder", email = "masnyder2@hotmail.com" }
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+requires-python = ">=3.10,<3.12"
 
-[tool.poetry.dependencies]
-python = ">=3.10,<3.12"
-snakemake = [
-    { version=">=7.20,<8", python = "<3.11" },
-    { version=">=8.1.2", python = ">=3.11" },
-]
-snakebids = ">=0.14.0"
-pulp = { version="<2.8.0", python = "<3.11" }
-pandas = [
-    { version = "<=2.0.3", python = "<3.9" },
-    { version = ">=2.1.1", python = ">=3.12" },
-]
-antspyx = "0.5.3"
-nilearn = "0.10.3"
-monai = "^1.4.0"
-tqdm = "^4.67.1"
-torchmetrics = "^1.6.3"
-pytorch-lightning = "^2.5.2"
-torchio = "^0.20.19"
-lpips = "^0.1.4"
-scikit-image = "^0.25.2"
-svgutils = "^0.3.4"
+dependencies = [
+    # Snakemake split by Python version
+    'snakemake>=7.20,<8; python_version<"3.11"',
+    'snakemake>=8.1.2; python_version>="3.11"',
 
-[tool.poetry.scripts]
+    'snakebids>=0.14.0',
+    'pulp<2.8.0; python_version<"3.11"',
+    'pandas<=2.0.3; python_version<"3.9"',
+    'pandas>=2.1.1; python_version>="3.12"',
+    'antspyx==0.5.3',
+    'nilearn==0.10.3',
+    'monai>=1.4.0',
+    'tqdm>=4.67.1',
+    'torchmetrics>=1.6.3',
+    'pytorch-lightning>=2.5.2',
+    'torchio>=0.20.19',
+    'lpips>=0.1.4',
+    'scikit-image>=0.25.2',
+    'svgutils>=0.3.4',
+]
+
+[project.scripts]
 mri_degad = "mri_degad.run:app.run"
 
+[project.optional-dependencies]
+dev = [
+    "sphinx>=7.2.6",
+    "sphinx-rtd-theme>=1.3.0",
+    "sphinx-autodoc-typehints>=1.24.0"
+]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.group.dev.dependencies]
-sphinx = "^7.2.6"
-sphinx-rtd-theme = "^1.3.0"
-sphinx-autodoc-typehints = "^1.24.0"
+requires = ["hatchling>=1.21.1"]
+build-backend = "hatchling.build"

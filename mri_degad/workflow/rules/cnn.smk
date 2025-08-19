@@ -22,7 +22,7 @@ rule apply_model_coronal:
         ),
         model_dir = Path(download_dir) / "models"
     params:
-        config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
+        config_path = str(Path(workflow.basedir) / "scripts" / "model_helpers" / "config_inference.json"),
         view = "coronal"
     resources:
         gpus=1 if config["use_gpu"] else 0,
@@ -49,7 +49,7 @@ rule apply_model_axial:
         ),
         model_dir = Path(download_dir) / "models"
     params:
-        config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
+        config_path = str(Path(workflow.basedir) / "scripts" / "model_helpers" / "config_inference.json"),
         view = "axial"
     resources:
         gpus=1 if config["use_gpu"] else 0,
@@ -76,7 +76,7 @@ rule apply_model_sagittal:
         ),
         model_dir = Path(download_dir) / "models"
     params:
-        config_path = "/local/scratch/MRI_Degad/mri_degad/workflow/scripts/config_inference.json",
+        config_path = str(Path(workflow.basedir) / "scripts" / "model_helpers" / "config_inference.json"),
         view = "sagittal"
     resources:
         gpus=1 if config["use_gpu"] else 0,
