@@ -1,12 +1,11 @@
 # MRI-Degad: Conversion of gadolinium-enhanced T1-weighted MRI to non-gadolinium T1-weighted scans
 [![Documentation Status](https://readthedocs.org/projects/mri_degad/badge/?version=latest)](https://mri-degad.readthedocs.io/en/stable/?badge=stable)
-![Version](https://img.shields.io/github/v/tag/mackenziesnyder/mri_degad?label=version)
 ![Python3](https://img.shields.io/badge/python-_3.10_|_3.11_|_3.12-blue.svg)
 ![Tests](https://github.com/mackenziesnyder/MRI_Degad/actions/workflows/lint_and_test.yml/badge.svg?branch=main)
 
 AIMS Lab Research Team at the Robarts Research Institute - 2024-2025
 
-![Alt text](docs/images/mri-degad-image.webp)
+![Alt text](https://raw.githubusercontent.com/mackenziesnyder/mri_degad/master/docs/images/mri-degad-image.webp)
 
 *This package is under active development. It should be stable and reproducible, but please let any of the active contributing members know if there are any bugs or unusual behaviour.*
 
@@ -16,7 +15,7 @@ This Python package is a program utilizing an adapted wat-stacked U-Net built of
 
 A brief summary of the workflow can be found below along with its Directed Acyclic Graph (DAG) (see documentation for a detailed summary):
 
-![Alt text](docs/images/dag.svg)
+![Alt text](https://raw.githubusercontent.com/mackenziesnyder/mri_degad/master/docs/images/dag.svg)
 
 1. Preprocess input NIfTI T1w gadolinium enhanced files (n4 bias correction, isotropic 1mm voxel resampling, min/max normalization)
 2. Download and apply the Degad model in the axial, sagittal, and coronal direction
