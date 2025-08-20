@@ -57,6 +57,7 @@ include: "rules/preprocessing.smk"
 include: "rules/cnn.smk"
 include: "rules/postprocessing.smk"
 include: "rules/qc.smk"
+include: "rules/analysis.smk"
 
 
 def get_final_output():
@@ -102,9 +103,43 @@ def get_final_output():
                 )
             ),
         )
+    if config["analysis"]:
+        final.extend(
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="analysis",
+                suffix="metrics.txt",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            ))
+        ),
+        final.extend(
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="analysis",
+                suffix="metrics_skull_stripped.txt",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            ))
+        ),
+        final.extend(
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="qc",
+                suffix="qc_nongad_to_degad.html",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            ))
+        ),
+        final.extend(
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="qc",
+                suffix="qc_nongad_to_degad_skull_stripped.html",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            ))
+        ),
     return final
 
 
 rule all:
     input:
         get_final_output(),
+

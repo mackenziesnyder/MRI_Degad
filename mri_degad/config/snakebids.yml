@@ -91,6 +91,12 @@ parse_args:
     default: False
     action: store_true
 
+  --analysis:
+    help: |
+      'Will run analysis on the data if ground truths are located in the input bids dir (default: %(default)s) '
+    default: False
+    action: store_true
+
 singularity:
     itksnap: 'docker://pyushkevich/itksnap:latest'
 
