@@ -2,7 +2,9 @@ import snakebids
 from snakebids import bids, generate_inputs, get_wildcard_constraints
 from appdirs import AppDirs
 
-configfile: '/config/snakebids.yml'
+
+configfile: "/config/snakebids.yml"
+
 
 # Get input wildcards
 inputs = generate_inputs(
@@ -15,9 +17,11 @@ inputs = generate_inputs(
     exclude_participant_label=config.get("exclude_participant_label", None),
 )
 
+
 # this adds constraints to the bids naming
 wildcard_constraints:
     **get_wildcard_constraints(config["pybids_inputs"]),
+
 
 # ----
 wildcard_constraints:
@@ -31,9 +35,10 @@ wildcard_constraints:
     autotop="[a-zA-Z0-9]+",
     template="[a-zA-Z0-9]+",
 
+
 root = os.path.expandvars(config["root"])
 work = os.path.expandvars(config["workdir"])
-resolution = float(config['res'])
+
 
 def get_download_dir():
     if "MRI_DEGAD_CACHE_DIR" in os.environ.keys():
@@ -44,27 +49,62 @@ def get_download_dir():
         download_dir = dirs.user_cache_dir
     return download_dir
 
+
 download_dir = get_download_dir()
 
-rule all:
-    input:
-        # t1w_degad = inputs["t1w"].expand(bids(
-        #     root=work,
-        #     datatype="degad",
-        #     desc="degad",
-        #     res=config["res"],
-        #     suffix="T1w.nii.gz",
-        #     acq="gad",
-        #     **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        # ))
-        t1w_degad = inputs["t1w"].expand(bids(
-            root=work,
-            datatype="mask",
-            suffix="mask.nii.gz",
-            acq="gad",
-            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
-        ))
-        
+
 include: "rules/preprocessing.smk"
 include: "rules/cnn.smk"
 include: "rules/postprocessing.smk"
+include: "rules/qc.smk"
+
+
+def get_final_output():
+    final = []
+    final.extend(
+        inputs["t1w"].expand(
+            bids(
+                root=work,
+                datatype="vasc_mask",
+                suffix="mask.nii.gz",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+            )
+        )
+    ),
+    final.extend(
+        inputs["t1w"].expand(
+            bids(
+                root=work,
+                datatype="qc",
+                suffix="qc.html",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+            )
+        ),
+    )
+    if config["skull_strip"]:
+        final.extend(
+            inputs["t1w"].expand(
+                bids(
+                    root=work,
+                    datatype="vasc_mask",
+                    suffix="mask_skull_stripped.nii.gz",
+                    **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+                )
+            ),
+        ),
+        final.extend(
+            inputs["t1w"].expand(
+                bids(
+                    root=work,
+                    datatype="qc",
+                    suffix="qc_skull_stripped.html",
+                    **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+                )
+            ),
+        )
+    return final
+
+
+rule all:
+    input:
+        get_final_output(),

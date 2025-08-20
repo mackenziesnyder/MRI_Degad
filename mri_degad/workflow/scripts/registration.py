@@ -1,6 +1,7 @@
 import csv
 import ants
 import numpy as np
+import os
 
 
 def antsmat2mat(transform, m_center):
@@ -68,49 +69,38 @@ def registration(fixed_image, moving_image, out_im):
         Path to the moving image that needs to be transformed.
     out_im : str
         Path to save the resampled (registered) image.
-    xfm_ras : str
-        Path to save the output affine transformation matrix (4x4).
 
     Returns
     -------
     None
     """
+    fixed_image = os.path.expanduser(fixed_image)
+    moving_image = os.path.expanduser(moving_image)
+    out_im = os.path.expanduser(out_im)
 
     # Load images
     fixed_image = ants.image_read(fixed_image)
     moving_image = ants.image_read(moving_image)
-    print("Before transform ct:", moving_image.shape)
 
     # Perform registration
     registration_result = ants.registration(
-        fixed=fixed_image, moving=moving_image, type_of_transform="Rigid",
-        gradient_step = 0.1, aff_iterations = (1000, 500, 250, 100), aff_shrink_factors = (8, 4, 2,1)
+        fixed=fixed_image,
+        moving=moving_image,
+        type_of_transform="Rigid",
+        gradient_step=0.1,
+        aff_iterations=(1000, 500, 250, 100),
+        aff_shrink_factors=(8, 4, 2, 1),
     )
 
     # Get the registered (warped) moving image
     registered_image = registration_result["warpedmovout"]
-    print("after transform ct:", registered_image.shape)
-
-    # Get the forward transformation
-    transformation_file_path = registration_result["fwdtransforms"][0]
-
-    # Load the transformation matrix directly
-    transform = ants.read_transform(transformation_file_path)
-    full_matrix = antsmat2mat(transform.parameters, transform.fixed_parameters)
 
     # Save the registered image
     ants.image_write(registered_image, out_im)
-    # ants.write_transform(transform, xfm_slicer)
-
-    # Save the 4x4 transformation matrix to a file
-    # with open(xfm_ras, "w", newline="") as file:
-    #     writer = csv.writer(file, delimiter=" ")
-    #     for row in full_matrix:
-    #         writer.writerow(row)
 
 
 registration(
-    moving_image=snakemake.input.moving_degad,
-    fixed_image=snakemake.input.fixed_gad,
-    out_im=snakemake.output.out_im
+    moving_image=snakemake.input.moving_im,
+    fixed_image=snakemake.input.fixed_im,
+    out_im=snakemake.output.out_im,
 )

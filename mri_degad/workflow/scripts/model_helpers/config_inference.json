@@ -1,0 +1,15 @@
+{
+  "loss_functions": [
+      "ssim_loss",
+      "perceptual_loss"
+  ],
+  "model_architecture": "wat_stacked_unets",
+  "checkpoint_path": null,
+  "skip_ada_multi_losses_norm": false,
+  "learning_rate": 0.001,
+  "height": 256,
+  "width": 256,
+  "data_loader": {
+      "enable_SAP": true  
+  }
+}
