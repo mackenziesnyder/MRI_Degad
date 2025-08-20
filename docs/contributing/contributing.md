@@ -15,7 +15,7 @@ Once uv is available, clone this repository and install all dependencies (includ
 git clone https://github.com/mackenziesnyder/MRI_DeGad.git
 cd MRI_Degad 
 uv venv
-source ./venv/Scripts/activate
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 uv pip install -e .[dev]
 ```
 
@@ -33,13 +33,13 @@ deactivate
 
 ## Running and fixing code format quality
 
-We use a few tools, including `ruff`, `snakefmt`, and `yamlfix` to ensure 
+We use a few tools, including `black`, `snakefmt`, and `isort` to ensure 
 formatting and style of our codebase is consistent. There are two task runners 
 you can use to check and fix your code, which can be invoked with:
 
 ```
-uv run poe quality-check
-uv run poe quality
+uv run quality-fix
+uv run quality-check
 ```
 
 ## Questions, Issues, Suggestions, and Other Feedback

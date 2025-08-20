@@ -36,6 +36,8 @@ dependencies = [
 
 [project.scripts]
 mri_degad = "mri_degad.run:app.run"
+quality-check = "mri_degad.tasks:quality_check"
+quality-fix   = "mri_degad.tasks:quality_fix"
 
 [project.optional-dependencies]
 dev = [
@@ -51,23 +53,3 @@ dev = [
 requires = ["hatchling>=1.21.1"]
 build-backend = "hatchling.build"
 
-[tool.poe.tasks]
-quality_check = { shell = "isort mri_degad/*.py -c && black mri_degad --check && snakefmt mri_degad --check" }
-quality_fix = { shell = "isort mri_degad/*.py && black mri_degad  && snakefmt mri_degad" }
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-
-[tool.pylint.master]
-ignore-patterns = "^[0-9][0-9]+_,^test_"
-
-[tool.pylint.format]
-good-names = "i,j,k,ex,_,x,y,f,d"
-
-[tool.pylint.messages_control]
-disable = """
-    missing-function-docstring,
-    missing-module-docstring,
-    fixme
-"""
