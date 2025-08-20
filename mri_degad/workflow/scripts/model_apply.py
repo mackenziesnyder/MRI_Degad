@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader
 from model_helpers.model import Model
 from model_helpers.data import NiftiTestDataset, resample_to_original
 
+
 def reconstruct_and_save(slice_dict, affine, view):
     """Reconstructs and saves a volume from slices. Pads/crops each dimension to 256 if needed."""
     if not slice_dict:
@@ -26,33 +27,34 @@ def reconstruct_and_save(slice_dict, affine, view):
             pad_width.append((pad_before, pad_after))
         else:
             pad_width.append((0, 0))
-    stack = np.pad(stack, pad_width, mode='constant')
+    stack = np.pad(stack, pad_width, mode="constant")
     # Crop if any dimension is greater than 256
     stack = stack[0:256, 0:256, 0:256]
 
     stack = stack.astype(np.float32)
 
-    if view == 'coronal':
+    if view == "coronal":
         stack = np.transpose(stack, (1, 0, 2))
-    elif view == 'axial':
+    elif view == "axial":
         stack = np.transpose(stack, (1, 2, 0))
     nii_out = nib.Nifti1Image(stack, affine)
     return nii_out
 
+
 def run_inference(view, data_path, checkpoint_path, config, output_path):
-    
+
     with open(config) as f:
         config = json.load(f)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Disable loss computations during inference
-    config['skip_ada_multi_losses_norm'] = True
-    enable_sap = config['data_loader'].get('enable_SAP', False)
+    config["skip_ada_multi_losses_norm"] = True
+    enable_sap = config["data_loader"].get("enable_SAP", False)
 
     checkpoint_path = checkpoint_path + "/" + "last.ckpt"
     print("checkpoint_path: ", checkpoint_path)
-    
+
     # Load model
     model = Model.load_from_checkpoint(checkpoint_path, config=config, device=device)
     model.eval().to(device)
@@ -75,13 +77,15 @@ def run_inference(view, data_path, checkpoint_path, config, output_path):
 
     pred_nii = reconstruct_and_save(pred_slices, test_dataset.affine, view)
     pred_recon = pred_nii.get_fdata()
-    was_resampled = test_dataset.motion_resampled
-    pred_recon_original = resample_to_original(pred_recon, test_dataset.ras_shape, was_resampled)
+    pred_recon_original = resample_to_original(pred_recon, test_dataset.ras_shape)
 
     # Save NIfTI if requested
     if output_path:
-        nii_out = nib.Nifti1Image(pred_recon_original.astype(np.float32), test_dataset.affine)
+        nii_out = nib.Nifti1Image(
+            pred_recon_original.astype(np.float32), test_dataset.affine
+        )
         nib.save(nii_out, output_path)
+
 
 if __name__ == "__main__":
 
@@ -90,5 +94,5 @@ if __name__ == "__main__":
         data_path=snakemake.input.t1w_gad,
         checkpoint_path=snakemake.input.model_dir,
         config=snakemake.params.config_path,
-        output_path=snakemake.output.degad_img
+        output_path=snakemake.output.degad_img,
     )

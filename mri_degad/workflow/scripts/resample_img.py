@@ -2,9 +2,8 @@ from nilearn.image import resample_img
 import numpy as np
 import nibabel as nib
 
-def resample_to_isotropic_resolution(
-    input_image_path, output_img
-):
+
+def resample_to_isotropic_resolution(input_image_path, output_img):
     """
     Resample a NIfTI MRI image to the 1mm isotropic resolution.
 
@@ -25,12 +24,11 @@ def resample_to_isotropic_resolution(
     img = nib.load(input_image_path)
 
     # Resample the image
-    resampled_image = resample_img(
-        img, target_affine=np.eye(3), interpolation="linear"
-    )
+    resampled_image = resample_img(img, target_affine=np.eye(3), interpolation="linear")
 
     # save image
     resampled_image.to_filename(output_img)
+
 
 if __name__ == "__main__":
     resample_to_isotropic_resolution(

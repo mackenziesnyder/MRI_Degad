@@ -84,8 +84,12 @@ def registration(fixed_image, moving_image, out_im):
 
     # Perform registration
     registration_result = ants.registration(
-        fixed=fixed_image, moving=moving_image, type_of_transform="Rigid",
-        gradient_step = 0.1, aff_iterations = (1000, 500, 250, 100), aff_shrink_factors = (8, 4, 2,1)
+        fixed=fixed_image,
+        moving=moving_image,
+        type_of_transform="Rigid",
+        gradient_step=0.1,
+        aff_iterations=(1000, 500, 250, 100),
+        aff_shrink_factors=(8, 4, 2, 1),
     )
 
     # Get the registered (warped) moving image
@@ -94,8 +98,9 @@ def registration(fixed_image, moving_image, out_im):
     # Save the registered image
     ants.image_write(registered_image, out_im)
 
+
 registration(
     moving_image=snakemake.input.moving_im,
     fixed_image=snakemake.input.fixed_im,
-    out_im=snakemake.output.out_im
+    out_im=snakemake.output.out_im,
 )

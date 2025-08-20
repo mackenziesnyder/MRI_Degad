@@ -2,8 +2,9 @@ import nibabel as nib
 import numpy as np
 from scipy.ndimage import median_filter
 
+
 def fuse_image(coronal, axial, sagittal, output):
-    
+
     # Load and undo permutations
     axial_img = nib.load(axial)
     coronal_img = nib.load(coronal)
@@ -78,13 +79,16 @@ def fuse_image(coronal, axial, sagittal, output):
             mean_fused = (corrected_axial + corrected_sagittal + corrected_coronal) / 3
             # median_fused = np.median(np.stack([corrected_axial, corrected_sagittal, corrected_coronal]), axis=0)
 
-    fused_img = nib.Nifti1Image(mean_fused, affine=axial_img.affine, header=axial_img.header)
+    fused_img = nib.Nifti1Image(
+        mean_fused, affine=axial_img.affine, header=axial_img.header
+    )
     nib.save(fused_img, output)
+
 
 if __name__ == "__main__":
     fuse_image(
         snakemake.input.degad_coronal,
         snakemake.input.degad_axial,
         snakemake.input.degad_sagittal,
-        snakemake.output.degad
-    ) 
+        snakemake.output.degad,
+    )

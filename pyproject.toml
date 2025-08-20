@@ -41,7 +41,10 @@ mri_degad = "mri_degad.run:app.run"
 dev = [
     "sphinx>=7.2.6",
     "sphinx-rtd-theme>=1.3.0",
-    "sphinx-autodoc-typehints>=1.24.0"
+    "sphinx-autodoc-typehints>=1.24.0",
+    "isort>=6.0.1",
+    "black>=24.10.0",
+    "snakefmt==0.10.3"
 ]
 
 [build-system]
@@ -49,8 +52,8 @@ requires = ["hatchling>=1.21.1"]
 build-backend = "hatchling.build"
 
 [tool.poe.tasks]
-quality_check = { shell = "isort nnunet_contact_seg/*.py -c && black nnunet_contact_seg --check && snakefmt nnunet_contact_seg --check" }
-quality_fix = { shell = "isort nnunet_contact_seg/*.py && black nnunet_contact_seg  && snakefmt nnunet_contact_seg" }
+quality_check = { shell = "isort mri_degad/*.py -c && black mri_degad --check && snakefmt mri_degad --check" }
+quality_fix = { shell = "isort mri_degad/*.py && black mri_degad  && snakefmt mri_degad" }
 
 [tool.isort]
 profile = "black"

@@ -12,6 +12,7 @@ from nilearn import plotting
 from svgutils.compose import Unit
 from svgutils.transform import GroupElement, SVGFigure, fromstring
 
+
 def svg2str(display_object, dpi):
     """Serialize a nilearn display object to string."""
     image_buf = StringIO()
@@ -113,6 +114,7 @@ def clean_svg(fg_svgs, bg_svgs, ref=0):
 
     return svg
 
+
 def output_html(gad_img, degad_img, output_html):
 
     isub = os.path.basename(gad_img).split("_")[0]
@@ -120,86 +122,113 @@ def output_html(gad_img, degad_img, output_html):
     degad_img = nib.load(degad_img)
     degad_img = nib.Nifti1Image(
         degad_img.get_fdata().astype(np.float32),
-        header= degad_img.header,
+        header=degad_img.header,
         affine=degad_img.affine,
     )
-    plot_args_ref = {"dim": -0.5} #dim adjustss the brifhtness, with -2 being max brightness and 2 being max dimness
+    plot_args_ref = {
+        "dim": -0.5
+    }  # dim adjustss the brifhtness, with -2 being max brightness and 2 being max dimness
 
-    display_x = plotting.plot_anat( 
-        degad_img, 
+    display_x = plotting.plot_anat(
+        degad_img,
         display_mode="x",
         draw_cross=False,
-        cut_coords=(-60,-40,0,20,40,60), #taking slice close to centre, coronal, sagittal and frontal
-        **plot_args_ref, # ** upacks the dict
+        cut_coords=(
+            -60,
+            -40,
+            0,
+            20,
+            40,
+            60,
+        ),  # taking slice close to centre, coronal, sagittal and frontal
+        **plot_args_ref,  # ** upacks the dict
     )
-    fg_x_svgs = [fromstring(extract_svg(display_x, 300))] 
+    fg_x_svgs = [fromstring(extract_svg(display_x, 300))]
     display_x.close()
 
-    display_y = plotting.plot_anat( 
-        degad_img,  
+    display_y = plotting.plot_anat(
+        degad_img,
         display_mode="y",
         draw_cross=False,
-        cut_coords=(-40,-20,0,20,40,60), #taking slice close to centre, coronal, sagittal and frontal
-        **plot_args_ref, # ** upacks the dict
+        cut_coords=(
+            -40,
+            -20,
+            0,
+            20,
+            40,
+            60,
+        ),  # taking slice close to centre, coronal, sagittal and frontal
+        **plot_args_ref,  # ** upacks the dict
     )
-    fg_y_svgs = [fromstring(extract_svg(display_y, 300))] 
+    fg_y_svgs = [fromstring(extract_svg(display_y, 300))]
     display_y.close()
 
-    display_z = plotting.plot_anat( 
+    display_z = plotting.plot_anat(
         degad_img,
         display_mode="z",
         draw_cross=False,
-        cut_coords=(-40,-20,0,20,40,60), #taking slice close to centre, coronal, sagittal and frontal
-        **plot_args_ref, # ** upacks the dict
+        cut_coords=(
+            -40,
+            -20,
+            0,
+            20,
+            40,
+            60,
+        ),  # taking slice close to centre, coronal, sagittal and frontal
+        **plot_args_ref,  # ** upacks the dict
     )
     fg_z_svgs = [fromstring(extract_svg(display_z, 300))]
     display_z.close()
 
+    # displaying gad image as background
+    gad_img = nib.load(gad_img)
 
-    #displaying gad image as background 
-    gad_img = nib.load(gad_img) 
-    
-    gad_img= nib.Nifti1Image(
+    gad_img = nib.Nifti1Image(
         gad_img.get_fdata().astype(np.float32),
         header=gad_img.header,
         affine=gad_img.affine,
     )
 
-    #displaying 6 columns of gad images for coronal, sagittal and frontal view
+    # displaying 6 columns of gad images for coronal, sagittal and frontal view
     display_x = plotting.plot_anat(
-        gad_img, #gad image
-        display_mode="x",# displaying 6 cuts in each axis 
+        gad_img,  # gad image
+        display_mode="x",  # displaying 6 cuts in each axis
         draw_cross=False,
-        cut_coords=(-60,-40,0,20,40,60),
+        cut_coords=(-60, -40, 0, 20, 40, 60),
         **plot_args_ref,
     )
-    bg_x_svgs = [fromstring(extract_svg(display_x, 300))]#rescaling for gad (background)
+    bg_x_svgs = [
+        fromstring(extract_svg(display_x, 300))
+    ]  # rescaling for gad (background)
     display_x.close()
 
     display_y = plotting.plot_anat(
-        gad_img, #gad image
-        display_mode="y",# displaying 6 cuts in each axis 
+        gad_img,  # gad image
+        display_mode="y",  # displaying 6 cuts in each axis
         draw_cross=False,
-        cut_coords=(-40,-20,0,20,40,60),
+        cut_coords=(-40, -20, 0, 20, 40, 60),
         **plot_args_ref,
     )
-    bg_y_svgs = [fromstring(extract_svg(display_y, 300))]#rescaling for gad (background)
+    bg_y_svgs = [
+        fromstring(extract_svg(display_y, 300))
+    ]  # rescaling for gad (background)
     display_y.close()
 
     display_z = plotting.plot_anat(
-        gad_img, #gad image
-        display_mode="z",# displaying 6 cuts in each axis 
+        gad_img,  # gad image
+        display_mode="z",  # displaying 6 cuts in each axis
         draw_cross=False,
-        cut_coords=(-40,-20,0,20,40,60),
+        cut_coords=(-40, -20, 0, 20, 40, 60),
         **plot_args_ref,
     )
-    bg_z_svgs = [fromstring(extract_svg(display_z, 300))]#rescaling for gad (background)
+    bg_z_svgs = [
+        fromstring(extract_svg(display_z, 300))
+    ]  # rescaling for gad (background)
     display_z.close()
 
-    
-    final_svg_rigid_x= "\n".join(clean_svg(fg_x_svgs, bg_x_svgs))
-    final_svg_rigid_y= "\n".join(clean_svg(fg_y_svgs, bg_y_svgs))
-    final_svg_rigid_z= "\n".join(clean_svg(fg_z_svgs, bg_z_svgs))
+    final_svg_rigid_x = "\n".join(clean_svg(fg_x_svgs, bg_x_svgs))
+    final_svg_rigid_y = "\n".join(clean_svg(fg_y_svgs, bg_y_svgs))
+    final_svg_rigid_z = "\n".join(clean_svg(fg_z_svgs, bg_z_svgs))
 
     message = f"""
         <html>
@@ -220,9 +249,8 @@ def output_html(gad_img, degad_img, output_html):
     with open(output_html, "w") as fid:
         fid.write(message)
 
-if __name__ == "__main__":  
+
+if __name__ == "__main__":
     output_html(
-        snakemake.input.degad_img,
-        snakemake.input.gad_img,
-        snakemake.output.out_html
+        snakemake.input.degad_img, snakemake.input.gad_img, snakemake.output.out_html
     )
