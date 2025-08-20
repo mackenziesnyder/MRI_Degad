@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
-from pathlib import Path
 import os
+from pathlib import Path
+
 from snakebids import bidsapp, plugins
 
-CONFIG_PATH = Path(__file__).resolve().parent / "config" / "snakebids.yml"
-print(f"Running on ReadTheDocs? {'READTHEDOCS' in os.environ}")
-print(f"Config file path: {CONFIG_PATH}")
-print(f"Exists? {CONFIG_PATH.exists()}")
+if "__file__" not in globals():
+    __file__ = "../mri_degad/run.py"
+
 
 app = bidsapp.app(
     [
         plugins.SnakemakeBidsApp(Path(__file__).resolve().parent),
         plugins.BidsValidator(),
         plugins.Version(distribution="MRI_Degad"),
+        plugins.CliConfig("parse_args"),
+        plugins.ComponentEdit("pybids_inputs"),
     ]
 )
 
