@@ -23,6 +23,8 @@ with arrows representing the connections (i.e. inputs / outputs) to these rules.
 ## Apply
 Use the classic BIDS App syntax to generate vascular maps between the gad and degad image and a qc plot between the gad and degad image. For other derivative outputs, the following flag is supported: 
 
+`--use-gpu`: This flag results in the model running on gpu, speeding up the model preformance. In order to use this flag, your system must have access to gpu. 
+
 `--skull-strip`: This flag produces a skull-stripped vascular map between the gad and degad image and a qc plot between the skull-stripped gad and degad image. Please note: in order to use the --skull-strip flag, Freesurfer must be installed on your local machine as this pipeline uses `synthstrip` from Freesurfer. To utilize this flag, please follow the instructions in from `synthstrip` [Here](https://surfer.nmr.mgh.harvard.edu/docs/synthstrip/) . 
 
 
