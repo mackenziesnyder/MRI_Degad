@@ -1,8 +1,9 @@
 rule quality_control:
     input:
         gad_img=bids(
-            root=str(Path(config["bids_dir"])),
-            datatype="anat",
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
             suffix="T1w.nii.gz",
             acq="gad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},

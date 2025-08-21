@@ -303,21 +303,117 @@ rule nongad_degad_skull_stripped_qc:
 
 rule synthsr:
     input: 
-        gad_img = 
+        gad_img = bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
     output:
-        degad_synthsr_img = 
+        degad_synthsr_img = bids(
+            root=work,
+            datatype="degad",
+            desc="synthsr",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
     shell: mri_synthsr --i {input.gad_img} --o {output.degad_snythsr_img} --threads 4
+
+rule download_original_model:
+    params:
+        url=config["resource_urls"][config["model_og"]],
+    output:
+        unzip_dir=directory(Path(download_dir) / "model_og"),
+    shell:
+        "wget https://{params.url} -O model.zip && "
+        " unzip -q -d {output.unzip_dir} model.zip && "
+        " rm model.zip"
 
 rule_original_model_degad:
     input: 
-        gad_img = 
+        gad_img = bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+        model_dir=Path(download_dir) / "model_og",
     output:
-        degad_orignal_model_img =
+        degad_img = bids(
+            root=work,
+            datatype="degad",
+            desc="original_model",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
     script: 
         "../scripts/original_model_apply.py"
 
-# to do: register everything to the preprocessed gad scan
-# register synthsr to gad, register original model to gad 
+rule register_sythsr_to_gad:
+    input:
+        fixed_im = bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+        moving_im =  bids(
+            root=work,
+            datatype="degad",
+            desc="synthsr",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    output:
+        out_im = bids(
+            root=work,
+            datatype="registration",
+            desc="sythsr_to_gad",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script:
+        "../scripts/registration.py"
+
+rule register_original_degad_to_gad:
+    input:
+        fixed_im = bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+        moving_im =  bids(
+            root=work,
+            datatype="degad",
+            desc="original_model",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    output:
+        out_im = bids(
+            root=work,
+            datatype="registration",
+            desc="original_model_to_gad",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script:
+        "../scripts/registration.py"
 
 rule create_figures:
     input:
@@ -345,8 +441,22 @@ rule create_figures:
             acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
         ),
-        original_degad_img = 
-        synthsr_img = 
+        original_degad_img = bids(
+            root=work,
+            datatype="registration",
+            desc="original_model_to_gad",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
+        synthsr_img = bids(
+            root=work,
+            datatype="registration",
+            desc="sythsr_to_gad",
+            suffix="T1w.nii.gz",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
         vasc_img = bids(
             root=work,
             datatype="vasc_mask",
@@ -355,7 +465,10 @@ rule create_figures:
         )
     output: 
         figure = bids(
-
+            root=work,
+            datatype="figures",
+            suffix="whole_compare.png",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
         )
     script:
         "../scripts/create_figures.py" 

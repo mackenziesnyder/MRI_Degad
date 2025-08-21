@@ -136,6 +136,14 @@ def get_final_output():
                 **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
             ))
         ),
+        final.extend(
+                inputs["t1w"].expand(bids(
+                root=work,
+                datatype="figures",
+                suffix="whole_compare.png",
+                **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+            ))
+        )
     return final
 
 
