@@ -1,13 +1,81 @@
-# calculate MAE, PSNR, SSIM
-
-rule skull_strip_nongad:
+rule n4_bias_correction_nongad:
     input:
-        in_img = bids(
+        input_im=bids(
             root=str(Path(config["bids_dir"])),
             datatype="anat",
             suffix="T1w.nii.gz",
             acq="nongad",
-            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    output:
+        corrected_im=bids(
+            root=work,
+            datatype="n4biascorr",
+            desc="n4_bias_corr",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    script:
+        "../scripts/n4_bias_corr.py"
+
+
+# isotropic resampling
+rule isotropic_resampling_nongad:
+    input:
+        input_im=bids(
+            root=work,
+            datatype="n4biascorr",
+            desc="n4_bias_corr",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    output:
+        resam_im=bids(
+            root=work,
+            datatype="resample",
+            desc="resampled",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    script:
+        "../scripts/resample_img.py"
+
+
+# minmax normalization
+rule normalize_minmax_nongad:
+    input:
+        input_im=bids(
+            root=work,
+            datatype="resample",
+            desc="resampled",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    output:
+        norm_im=bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    script:
+        "../scripts/normalize.py"
+
+rule skull_strip_nongad:
+    input:
+        in_img = bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
         ),
     output:
         out_im_skull_stripped = bids(
@@ -31,14 +99,45 @@ rule skull_strip_nongad:
     shell:
         "mri_synthstrip -i {input.in_img} -o {output.out_im_skull_stripped} &>{log}"
 
-rule register_degad_to_nongad:
+rule register_nongad_to_gad:
     input:
         fixed_im = bids(
-            root=str(Path(config["bids_dir"])),
-            datatype="anat",
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ), 
+        moving_im =  bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+    output:
+        out_im = bids(
+            root=work,
+            datatype="registration",
+            desc="nongad_to_gad",
             suffix="T1w.nii.gz",
             acq="nongad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        )
+    script:
+        "../scripts/registration.py"
+
+rule register_degad_to_nongad:
+    input:
+        fixed_im = bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
         ),
         moving_im =  bids(
             root=work,
@@ -93,11 +192,12 @@ rule register_degad_to_nongad_skull_stripped:
 rule calculate_metrics:
     input:
         nongad = bids(
-            root=str(Path(config["bids_dir"])),
-            datatype="anat",
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
             suffix="T1w.nii.gz",
             acq="nongad",
-            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
         ),
         degad = bids(
             root=work,
@@ -148,11 +248,12 @@ rule calculate_metrics_skull_stripped:
 rule nongad_degad_qc:
     input:
         gad_img = bids(
-            root=str(Path(config["bids_dir"])),
-            datatype="anat",
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
             suffix="T1w.nii.gz",
             acq="nongad",
-            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
         ),
         degad_img = bids(
             root=work,
@@ -199,3 +300,62 @@ rule nongad_degad_skull_stripped_qc:
         )
     script:
         "../scripts/qc.py"
+
+rule synthsr:
+    input: 
+        gad_img = 
+    output:
+        degad_synthsr_img = 
+    shell: mri_synthsr --i {input.gad_img} --o {output.degad_snythsr_img} --threads 4
+
+rule_original_model_degad:
+    input: 
+        gad_img = 
+    output:
+        degad_orignal_model_img =
+    script: 
+        "../scripts/original_model_apply.py"
+
+# to do: register everything to the preprocessed gad scan
+# register synthsr to gad, register original model to gad 
+
+rule create_figures:
+    input:
+        gad_img = bids(
+            root=work,
+            datatype="normalize",
+            desc="normalize_minmax",
+            suffix="T1w.nii.gz",
+            acq="gad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ), 
+        nongad_img = bids(
+            root=work,
+            datatype="registration",
+            desc="nongad_to_gad",
+            suffix="T1w.nii.gz",
+            acq="nongad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"}
+        ),
+        degad_img = bids(
+            root=work,
+            datatype="registration",
+            suffix="T1w.nii.gz",
+            desc="degad_to_gad",
+            acq="degad",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        ),
+        original_degad_img = 
+        synthsr_img = 
+        vasc_img = bids(
+            root=work,
+            datatype="vasc_mask",
+            suffix="mask.nii.gz",
+            **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
+        )
+    output: 
+        figure = bids(
+
+        )
+    script:
+        "../scripts/create_figures.py" 
