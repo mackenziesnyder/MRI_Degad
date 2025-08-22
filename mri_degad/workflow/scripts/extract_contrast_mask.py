@@ -21,7 +21,7 @@ def extract_contrast_mask_red_overlay(gad_img_path, degad_img_path, out_prob_pat
         enhancement = gad_data - degad_data
 
         # threshold to extract vasculature
-        lower, upper = np.percentile(enhancement, [95, 99.9])
+        lower, upper = np.percentile(enhancement, [93, 99.9])
         prob_map = np.clip((enhancement - lower) / (upper - lower), 0, 1)
 
         prob_nifti = nib.Nifti1Image(prob_map.astype(np.float32), gad_img.affine)

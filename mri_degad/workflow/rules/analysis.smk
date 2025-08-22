@@ -320,11 +320,11 @@ rule synthsr:
             acq="degad",
             **{k: v for k, v in inputs["t1w"].wildcards.items() if k != "acq"},
         ),
-    shell: mri_synthsr --i {input.gad_img} --o {output.degad_snythsr_img} --threads 4
+    shell: "mri_synthsr --i {input.gad_img} --o {output.degad_synthsr_img} --threads 4"
 
 rule download_original_model:
     params:
-        url=config["resource_urls"][config["model_og"]],
+        url=config["resource_urls"]["model_og"],
     output:
         unzip_dir=directory(Path(download_dir) / "model_og"),
     shell:
@@ -332,7 +332,7 @@ rule download_original_model:
         " unzip -q -d {output.unzip_dir} model.zip && "
         " rm model.zip"
 
-rule_original_model_degad:
+rule original_model_degad:
     input: 
         gad_img = bids(
             root=work,

@@ -22,10 +22,9 @@ def get_model_file(model_dir):
 
 def train_model(model_file, t1w_gad, t1w_degad):
 
-    args = model_file.split('_')[4:7]
-    filter = int(args[0].split('-')[1])
-    cnn_depth= int(args[1].split('-')[1])
-    layer_per_block = int(args[2].split('-')[1])
+    filter = 128
+    cnn_depth= 3
+    layer_per_block = 2
     bottleneck = cnn_depth
 
     channels = ()

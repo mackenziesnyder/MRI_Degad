@@ -102,7 +102,7 @@ singularity:
 
 resource_urls:
   # original model 
-  original_model: 'files.osf.io/v1/resources/mkwpt/providers/osfstorage/?zip='
+  model_og: 'files.osf.io/v1/resources/mkwpt/providers/osfstorage/?zip='
 
   # mahmoud's model 
   default: 'files.osf.io/v1/resources/c23jw/providers/osfstorage/?zip='
